@@ -1,6 +1,8 @@
 typedef int INT32;
 #include <cstdint>
+#include <bitset>
 #include <iostream>
+using namespace std;
 class DESUtils
 {
 private:
@@ -76,11 +78,13 @@ private:
                              41, 52, 31, 37, 47, 55, 30, 40,
                              51, 45, 33, 48, 44, 49, 39, 56,
                              34, 53, 46, 42, 50, 36, 29, 32};
+    // 56 bits × 16 stored in 16 Rounds
+    uint64_t roundKeys[16];
 
     // Generate Key for DES, using the first 56 bits of the input key
-    INT32 genKey();
-    INT32 permutationKey(uint32_t *key, int mode);
-    INT32 shiftKey(uint32_t *key);
+
+    INT32 permutationKey(uint64_t *key, int mode);
+    INT32 shiftKey(uint32_t *key, int round);
 
     // Formal DES Algorithm for 16 rounds
     INT32 initialPermutation(uint32_t *data);
@@ -91,11 +95,12 @@ private:
 
 public:
     // Constructor
-    DESUtils();
+    DESUtils(){};
     // Destructor
-    ~DESUtils();
+    ~DESUtils(){};
     // Encrypt the plaintext
     void encrypt(const char *plaintext, const char *key, char *ciphertext);
     // Decrypt the ciphertext
+    INT32 genKey(uint64_t *key);
     void decrypt(const char *ciphertext, const char *key, char *plaintext);
 };
