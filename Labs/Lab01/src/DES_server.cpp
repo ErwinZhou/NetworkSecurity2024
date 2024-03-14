@@ -92,4 +92,10 @@ REBOOT:
     }
     close(sListenSocket);
     printf("[SYSTEM]We got a agent from %s, port %d, socket %d\n", inet_ntoa(agentAddr.sin_addr), ntohs(agentAddr.sin_port), sAcceptSocket);
+    cout << "[WARNING]The enemy is potentially in earshot. Be careful!" << endl;
+    while (1)
+    {
+        cout << "[SYSTEM]Please give us further instructions!" << endl;
+        cout << "1:Under surveillance" << endl;
+    }
 }

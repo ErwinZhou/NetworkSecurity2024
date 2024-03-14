@@ -70,7 +70,8 @@ int main()
         exit(0);
     }
     cout << "[SYSTEM]Successfully connected to the Headquarter!" << endl;
-    while (1)
-        ;
+
+    cout << "[WARNING]The enemy is potentially in earshot. We are under surveillance, be careful!" << endl;
+
     return 0;
 }
