@@ -1,8 +1,11 @@
 typedef int INT32;
 #include <cstdint>
 #include <bitset>
+#include <cstring>
 #include <iostream>
 using namespace std;
+#define SUCCESS 1
+#define FAILURE 0
 class DESUtils
 {
 private:
@@ -14,9 +17,14 @@ private:
                                     38, 6, 46, 14, 54, 22, 62, 30, 37, 5, 45, 13, 53, 21, 61, 29,
                                     36, 4, 44, 12, 52, 20, 60, 28, 35, 3, 43, 11, 51, 19, 59, 27,
                                     34, 2, 42, 10, 50, 18, 58, 26, 33, 1, 41, 9, 49, 17, 57, 25};
-    const uint8_t EBox[48] = {32, 1, 2, 3, 4, 5, 4, 5, 6, 7, 8, 9, 8,
-                              9, 10, 11, 12, 13, 12, 13, 14, 15, 16, 17, 16, 17, 18, 19, 20, 21,
-                              20, 21, 22, 23, 24, 25, 24, 25, 26, 27, 28, 29, 28, 29, 30, 31, 32, 1};
+    const uint8_t EBox[48] = {32, 1, 2, 3, 4, 5,
+                              4, 5, 6, 7, 8, 9,
+                              8, 9, 10, 11, 12, 13,
+                              12, 13, 14, 15, 16, 17,
+                              16, 17, 18, 19, 20, 21,
+                              20, 21, 22, 23, 24, 25,
+                              24, 25, 26, 27, 28, 29,
+                              28, 29, 30, 31, 32, 1};
 
     const uint8_t SBox[8][64] =
         {
@@ -60,7 +68,10 @@ private:
              0x0, 0xe, 0xc, 0x9, 0x7, 0x2, 0x7, 0x2, 0xb, 0x1, 0x4, 0xe, 0x1,
              0x7, 0x9, 0x4, 0xc, 0xa, 0xe, 0x8, 0x2, 0xd, 0x0, 0xf, 0x6, 0xc,
              0xa, 0x9, 0xd, 0x0, 0xf, 0x3, 0x3, 0x5, 0x5, 0x6, 0x8, 0xb}};
-
+    const uint8_t PBox[32] = {16, 7, 20, 21, 29, 12, 28, 17,
+                              1, 15, 23, 26, 5, 18, 31, 10,
+                              2, 8, 24, 14, 32, 27, 3, 9,
+                              19, 13, 30, 6, 22, 11, 4, 25};
     // Const tables for DES key generation
     const uint8_t PC1[56] = {57, 49, 41, 33, 25, 17, 9,
                              1, 58, 50, 42, 34, 26, 18,
@@ -82,16 +93,17 @@ private:
     uint64_t roundKeys[16];
 
     // Generate Key for DES, using the first 56 bits of the input key
-
     INT32 permutationKey(uint64_t *key, int mode);
     INT32 shiftKey(uint32_t *key, int round);
 
     // Formal DES Algorithm for 16 rounds
-    INT32 initialPermutation(uint32_t *data);
-    INT32 initialPermutationReverse(uint32_t *data);
-    INT32 expansionBox(uint32_t *data);
-    INT32 extractionBox(uint32_t *data);
-    INT32 roundHandler(uint32_t *data, uint32_t *subKey, int mode);
+    INT32 initialPermutation(uint64_t *data);
+    INT32 initialPermutationReverse(uint64_t *data);
+    INT32 expansionBox(uint32_t *data, uint64_t *output);
+    INT32 extractionBox(uint64_t *data, uint32_t *output);
+    INT32 permutation(uint32_t *data);
+    INT32 roundHandler(uint32_t *leftData, uint32_t *rightData, uint64_t *roundKey);
+    INT32 roundHandlerReverse(uint32_t *leftData, uint32_t *rightData, uint64_t *roundKey);
 
 public:
     // Constructor

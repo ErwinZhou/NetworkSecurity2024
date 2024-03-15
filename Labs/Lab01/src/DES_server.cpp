@@ -96,6 +96,35 @@ REBOOT:
     while (1)
     {
         cout << "[SYSTEM]Please give us further instructions!" << endl;
-        cout << "1:Under surveillance" << endl;
+        cout << "1:Let's GO DARK! Slient Guardian, ACTIVATE!" << endl;
+        cout << "2:Forget about their existence." << endl;
+        cout << "3:Terminate the connection! ASAP!" << endl;
+        cin >> instruction;
+        if (cin.fail())
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input. Please enter a number." << endl;
+            continue;
+        }
+        switch (instruction)
+        {
+        case 1:
+            cout << "Yes, sir!" << endl;
+            return;
+            break;
+        case 2:
+            cout << "Yes, sir!" << endl;
+            return;
+            break;
+        case 3:
+            cout << "System aborted and files all in ash!" << endl;
+            exit(0);
+            break;
+        default:
+            cout << "Sorry, sir! I am not following you." << endl;
+            break;
+        }
     }
+    return 0;
 }
