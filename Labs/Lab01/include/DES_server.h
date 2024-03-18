@@ -6,6 +6,8 @@
 #include <arpa/inet.h>  // Provides IP address conversion functions
 #include <unistd.h>     // Provides general system call functions
 #include <netdb.h>      // Provides domain name resolution functions
+#include "utils.h"
+#include "DES.h"
 using namespace std;
 // In case the M16 headquarter is under a DDoS attack
 // There will be a maximum of 5 connection requests
@@ -18,6 +20,13 @@ int sAcceptSocket;
 sockaddr_in serverAddr;
 sockaddr_in agentAddr;
 int instruction;
+enum
+{
+    M16 = 0,
+    AGENT = 1
+};
 
 // Handling emergency for the commnad center
 void emergencyResponse();
+void phantomHook(int role);
+void silentGuardain(int role);

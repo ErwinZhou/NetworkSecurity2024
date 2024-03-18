@@ -2,6 +2,9 @@
 
 void emergencyResponse()
 {
+    /**
+     * This is a function to handle emergency for the commnad center
+     */
     cout << "We must have been compromised!" << endl;
     cout << "Commander, please give us further instructions!" << endl;
     cout << "1:Abort the system and destory all files, NOW!" << endl;
@@ -30,6 +33,53 @@ void emergencyResponse()
             cout << "Sorry, sir! I am not following you." << endl;
             break;
         }
+    }
+}
+void phantomHook(int role)
+{
+    /*
+     * Secret Code Name:Phantom Hook
+     * This is a bait to lure the enemy in and then we can take them down
+     * We will use this as a trap to catch the enemy by communicating without any encryption
+     * role: AGENT for agent, M16 for headquarter
+     */
+    if (role == AGENT)
+    {
+        // This part is in the agent's side
+        cout << "007, we’re reading you loud and clear. Noting happened. Don't worry.Proceed with your update. Over." << endl;
+    }
+    else
+    {
+        // This part is in the headquarter's side
+        cout << "Phantom Hook is activated." << endl;
+        // Notify the agent to also activate the Phantom Hook
+        send(sAcceptSocket, "Phantom Hook", 100, 0);
+        pid_t nPid;
+        nPid = fork();
+    }
+}
+void silentGuardain(int role)
+{
+    /*
+     * Secret Code Name:Silent Guardian
+     * This is a secret communicating channel for the headquarter and the agent
+     * In case there is enemy's interception, this will be activated to ensure the safety of the communication
+     * The communication is based on the DES algorithm
+     * role: AGENT for agent, M16 for headquarter
+     */
+    if (role == AGENT)
+    {
+        // This part is in the agent's side
+        cout << "007, we’re reading you loud and clear on Silent Guardian. All other channels are compromised. Proceed with your update. Over." << endl;
+    }
+    else
+    {
+        // This part is in the headquarter's side
+        cout << "Silent Guardian is activated.." << endl;
+        // Notify the agent to also activate the Silent Guardian
+        send(sAcceptSocket, "Silent Guardian", 100, 0);
+        pid_t nPid;
+        nPid = fork();
     }
 }
 int main()
@@ -111,14 +161,36 @@ REBOOT:
         {
         case 1:
             cout << "Yes, sir!" << endl;
-            return;
+            /**
+             * Secret Code Name:Silent Guardian
+             * This is a secret communicating channel for the headquarter and the agent
+             * In case there is enemy's interception, this will be activated to ensure the safety of the communication
+             */
+            silentGuardain(M16);
+            return 0;
             break;
         case 2:
             cout << "Yes, sir!" << endl;
-            return;
+            /** Normally communicating without any encryption
+             * This could be a potential threat to the system
+             * But we can also use this as a trap to catch the enemy
+             * Like a bait to lure the enemy in
+             * And then we can take them down
+             * This is a risky move, but it could be a potential strategy
+             */
+            phantomHook(M16);
+
+            return 0;
             break;
         case 3:
             cout << "System aborted and files all in ash!" << endl;
+            /**
+             * In case the system is compromised
+             * We have to abort the system and destory all files
+             * This is the last resort
+             */
+            send(sAcceptSocket, "System aborted and files all in ash!", 100, 0);
+            close(sAcceptSocket);
             exit(0);
             break;
         default:

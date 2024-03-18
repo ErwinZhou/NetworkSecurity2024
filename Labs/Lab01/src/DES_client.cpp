@@ -1,7 +1,43 @@
 #include "DES_client.h"
-using namespace std;
+
+void phantomHook(int role)
+{
+    /*
+     * Secret Code Name:Phantom Hook
+     * This is a bait to lure the enemy in and then we can take them down
+     * We will use this as a trap to catch the enemy by communicating without any encryption
+     * role: 0 for agent, 1 for headquarter
+     */
+    if (role == M16)
+    {
+        cout << "007, we’re reading you loud and clear. Noting happened. Don't worry.Proceed with your update. Over." << endl;
+    }
+    else
+    {
+        cout << "Phantom Hook is activated. Please proceed with your update." << endl;
+    }
+}
+void silentGuardain(int role)
+{
+    /*
+     * Secret Code Name:Silent Guardian
+     * This is a secret communicating channel for the headquarter and the agent
+     * In case there is enemy's interception, this will be activated to ensure the safety of the communication
+     * The communication is based on the DES algorithm
+     * role: 0 for agent, 1 for headquarter
+     */
+    if (role == 0)
+    {
+        cout << "007, we’re reading you loud and clear on Silent Guardian. All other channels are compromised. Proceed with your update. Over." << endl;
+    }
+    else
+    {
+        cout << "Silent Guardian is activated. Please proceed with your update." << endl;
+    }
+}
 int main()
 {
+
     // Easter Egg Part
     cout << "-----------Secret Hideout-----------" << endl;
     cout << "[SYSTEM]Stop there mate! Who are you?" << endl;
@@ -72,6 +108,37 @@ int main()
     cout << "[SYSTEM]Successfully connected to the Headquarter!" << endl;
 
     cout << "[WARNING]The enemy is potentially in earshot. We are under surveillance, be careful!" << endl;
-
+    while (1)
+    {
+        recv(agentSocket, strSocketBuffer, BUFFERSIZE, 0);
+        if (strSocketBuffer != nullptr && strlen(strSocketBuffer) > 0)
+        {
+            if (strcmp(strSocketBuffer, "Phantom Hook") == 0)
+            {
+                // Activate the Phantom Hook
+                phantomHook(AGENT);
+                close(agentSocket);
+                return 0;
+            }
+            else if (strcmp(strSocketBuffer, "Silent Guardian") == 0)
+            {
+                // Activate the Silent Guardian
+                silentGuardain(AGENT);
+                close(agentSocket);
+                return 0;
+            }
+            else
+            {
+                if (strcmp(strSocketBuffer, "quit") == 0)
+                {
+                    cout << "Quit!" << endl;
+                    break;
+                }
+                // Receive the message from the M16
+                cout << "Receive message from M16: " << strSocketBuffer << endl;
+            }
+        }
+    }
+    close(agentSocket);
     return 0;
 }

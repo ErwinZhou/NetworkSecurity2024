@@ -48,21 +48,17 @@ std::string binaryToHex(const std::string &binary)
     ss << std::hex << set.to_ullong();
     return ss.str();
 }
-void silentGuardain(int role)
+ssize_t TotalRecv(int s, void *buf, size_t len, int flags)
 {
-    /*
-     * Secret Code Name:Silent Guardian
-     * This is a secret communicating channel for the headquarter and the agent
-     * In case there is enemy's interception, this will be activated to ensure the safety of the communication
-     * The communication is based on the DES algorithm
-     * role: 0 for agent, 1 for headquarter
-     */
-    if (role == 0)
+    size_t nCurSize = 0;
+    while (nCurSize < len)
     {
-        cout << "007, we’re reading you loud and clear on Silent Guardian. All other channels are compromised. Proceed with your update. Over." << endl;
+        ssize_t nRes = recv(s, ((char *)buf) + nCurSize, len - nCurSize, flags);
+        if (nRes < 0 || nRes + nCurSize > len)
+        {
+            return -1;
+        }
+        nCurSize += nRes;
     }
-    else
-    {
-        cout << "Silent Guardian is activated. Please proceed with your update." << endl;
-    }
+    return nCurSize;
 }
