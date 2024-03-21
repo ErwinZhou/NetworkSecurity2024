@@ -17,9 +17,9 @@ void printBits32(uint32_t num)
     cout << endl;
 }
 
-std::string hexToBinary(const std::string &hex)
+string hexToBinary(const string &hex)
 {
-    std::bitset<16> set(std::stoull(hex, nullptr, 16));
+    bitset<16> set(stoull(hex, nullptr, 16));
     return set.to_string();
 }
 
@@ -41,13 +41,28 @@ string stringBits32(uint32_t num)
     }
     return binary;
 }
-std::string binaryToHex(const std::string &binary)
+string binaryToHex(const string &binary)
 {
-    std::bitset<64> set(binary);
-    std::stringstream ss;
-    ss << std::hex << set.to_ullong();
+    bitset<64> set(binary);
+    stringstream ss;
+    ss << hex << set.to_ullong();
     return ss.str();
 }
+
+string timeNow()
+{
+    /**
+     * Get the current time
+     * @return string
+     */
+    auto now = chrono::system_clock::now();
+    time_t current_time = chrono::system_clock::to_time_t(now);
+
+    string timeString = ctime(&current_time);
+    timeString.pop_back();
+    return timeString;
+}
+
 ssize_t TotalRecv(int s, void *buf, size_t len, int flags)
 {
     size_t nCurSize = 0;
