@@ -77,3 +77,56 @@ ssize_t TotalRecv(int s, void *buf, size_t len, int flags)
     }
     return nCurSize;
 }
+
+void phantomHook(int role, int socket)
+{
+    /*
+     * Secret Code Name:Phantom Hook
+     * This is a bait to lure the enemy in and then we can take them down
+     * We will use this as a trap to catch the enemy by communicating without any encryption
+     * role: AGENT for agent, M16 for headquarter
+     */
+    if (role == AGENT)
+    {
+        // This part is in the agent's side
+        string str_time = timeNow();
+        cout << "<Agent::System @ " + str_time + " # Message>:007, we’re reading you loud and clear. Noting happened. Don't worry.Proceed with your update. Over." << endl;
+    }
+    else
+    {
+        // This part is in the headquarter's side
+        string str_time = timeNow();
+        cout << "<Headquarter::System @ " + str_time + " # Message>:Phantom Hook is activated." << endl;
+        // Notify the agent to also activate the Phantom Hook
+        send(socket, "Phantom Hook", 100, 0);
+        pid_t nPid;
+        nPid = fork();
+    }
+}
+
+void silentGuardain(int role, int socket)
+{
+    /*
+     * Secret Code Name:Silent Guardian
+     * This is a secret communicating channel for the headquarter and the agent
+     * In case there is enemy's interception, this will be activated to ensure the safety of the communication
+     * The communication is based on the DES algorithm
+     * role: AGENT for agent, M16 for headquarter
+     */
+    if (role == AGENT)
+    {
+        // This part is in the agent's side
+        string str_time = timeNow();
+        cout << "<Agent::System @ " + str_time + " # Message>:007, we’re reading you loud and clear on Silent Guardian. All other channels are compromised. Proceed with your update. Over." << endl;
+    }
+    else
+    {
+        // This part is in the headquarter's side
+        string str_time = timeNow();
+        cout << "<Headquarter::System @ " + str_time + " # Message>:Silent Guardian is activated.." << endl;
+        // Notify the agent to also activate the Silent Guardian
+        send(socket, "Silent Guardian", 100, 0);
+        pid_t nPid;
+        nPid = fork();
+    }
+}

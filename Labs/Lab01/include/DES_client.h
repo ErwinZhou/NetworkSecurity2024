@@ -22,11 +22,3 @@ struct sockaddr_in serverAddr;
 int choice; // choice for the user to select the default IP address or input the IP address manually
 
 char strSocketBuffer[BUFFERSIZE];
-enum
-{
-    M16 = 0,
-    AGENT = 1
-};
-
-void phantomHook(int role);
-void silentGuardain(int role);

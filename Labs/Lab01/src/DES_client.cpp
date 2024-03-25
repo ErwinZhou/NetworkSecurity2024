@@ -1,40 +1,4 @@
 #include "DES_client.h"
-
-void phantomHook(int role)
-{
-    /*
-     * Secret Code Name:Phantom Hook
-     * This is a bait to lure the enemy in and then we can take them down
-     * We will use this as a trap to catch the enemy by communicating without any encryption
-     * role: 0 for agent, 1 for headquarter
-     */
-    if (role == M16)
-    {
-        cout << "007, we’re reading you loud and clear. Noting happened. Don't worry.Proceed with your update. Over." << endl;
-    }
-    else
-    {
-        cout << "Phantom Hook is activated. Please proceed with your update." << endl;
-    }
-}
-void silentGuardain(int role)
-{
-    /*
-     * Secret Code Name:Silent Guardian
-     * This is a secret communicating channel for the headquarter and the agent
-     * In case there is enemy's interception, this will be activated to ensure the safety of the communication
-     * The communication is based on the DES algorithm
-     * role: 0 for agent, 1 for headquarter
-     */
-    if (role == 0)
-    {
-        cout << "007, we’re reading you loud and clear on Silent Guardian. All other channels are compromised. Proceed with your update. Over." << endl;
-    }
-    else
-    {
-        cout << "Silent Guardian is activated. Please proceed with your update." << endl;
-    }
-}
 int main()
 {
 
@@ -57,7 +21,6 @@ int main()
     cout << "-----Agent:007-----" << endl;
     cout << "<Headquarter::System @ " + str_time + " # Message>:The mission is almost ready to launch !" << endl;
     cout << "<Headquarter::System @ " + str_time + " # Message>:Please wait for a moment, Mr.Bond!" << endl;
-    cout << "[SYSTEM]Please wait for a moment, Mr.Bond!" << endl;
     cout << "-----Creating Socket-----" << endl;
     // Create a socket
     agentSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -128,27 +91,44 @@ int main()
             if (strcmp(strSocketBuffer, "Phantom Hook") == 0)
             {
                 // Activate the Phantom Hook
-                phantomHook(AGENT);
+                PhantomHook(AGENT, agentSocket);
                 close(agentSocket);
                 return 0;
             }
             else if (strcmp(strSocketBuffer, "Silent Guardian") == 0)
             {
                 // Activate the Silent Guardian
-                silentGuardain(AGENT);
+                SilentGuardian(AGENT, agentSocket);
                 close(agentSocket);
                 return 0;
             }
             else
             {
-                if (strcmp(strSocketBuffer, "quit") == 0)
+
+                DESUtils des;
+                char *key = "YCZhouNB";
+                uint64_t numKey = 0;
+                for (int i = 0; i < 8; ++i)
                 {
-                    cout << "Quit!" << endl;
+                    numKey <<= 8;
+                    numKey |= static_cast<unsigned char>(key[i]);
+                }
+                des.genKey(&numKey);
+                char decryptedtext[64]; // 存储解密后的文本
+                memset(decryptedtext, 0, 64);
+                // Receive the message from the M16
+                des.decrypt(strSocketBuffer, decryptedtext);
+                str_time = timeNow();
+                cout << "<Headquarter::M16 @ " + str_time + " # Message> " << decryptedtext << endl;
+                if (strcmp(strSocketBuffer, "System aborted and files all in ash!") == 0)
+                {
+                    cout << "<Headquarter::SYSTEM @ " + str_time + " # Message> " +
+                                "Run away, Agent!The Headquarter is down..."
+                         << endl;
+                    cout << "[*%$$K#$%%SA]You are on your own now......" << endl;
                     break;
                 }
-                // Receive the message from the M16
-                str_time = timeNow();
-                cout << "<Headquarter::System @ " + str_time + " # Message>:Receive message from M16: " << strSocketBuffer << endl;
+                memset(strSocketBuffer, 0, BUFFERSIZE);
             }
         }
     }
