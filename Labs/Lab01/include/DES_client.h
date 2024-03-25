@@ -9,12 +9,19 @@
 #include <netdb.h>      // Provides domain name resolution functions
 #include "DES.h"
 #include "utils.h"
-
 using namespace std;
 #define SERVER_PORT 8007
 #define BUFFERSIZE 1024
 
+/* DES parameters */
+DESUtils des;
+char *key = "YCZhouNB";
+uint64_t numKey;
+char decryptedtext[64];
+
+/* socket parameters */
 string agentName;
+string agentcodeName;
 string serverIP = "192.168.126.128";
 int agentSocket;
 struct sockaddr_in serverAddr;

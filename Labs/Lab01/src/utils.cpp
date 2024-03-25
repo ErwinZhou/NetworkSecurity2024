@@ -65,6 +65,14 @@ string timeNow()
 
 ssize_t TotalRecv(int s, void *buf, size_t len, int flags)
 {
+    /**
+     * Receive data from the socket in case sometimes not all data is received out of change of network
+     * @param s: socket
+     * @param buf: buffer to store the data
+     * @param len: length of the data
+     * @param flags: flags
+     * @return ssize_t
+     */
     size_t nCurSize = 0;
     while (nCurSize < len)
     {
@@ -78,13 +86,16 @@ ssize_t TotalRecv(int s, void *buf, size_t len, int flags)
     return nCurSize;
 }
 
-void phantomHook(int role, int socket)
+void PhantomHook(int role, int socket)
 {
-    /*
+    /**
      * Secret Code Name:Phantom Hook
      * This is a bait to lure the enemy in and then we can take them down
      * We will use this as a trap to catch the enemy by communicating without any encryption
      * role: AGENT for agent, M16 for headquarter
+     * @param role: AGENT for agent, M16 for headquarter
+     * @param socket: socket
+     * @return void
      */
     if (role == AGENT)
     {
@@ -104,14 +115,16 @@ void phantomHook(int role, int socket)
     }
 }
 
-void silentGuardain(int role, int socket)
+void SilentGuardian(int role, int socket)
 {
-    /*
+    /**
      * Secret Code Name:Silent Guardian
      * This is a secret communicating channel for the headquarter and the agent
      * In case there is enemy's interception, this will be activated to ensure the safety of the communication
      * The communication is based on the DES algorithm
-     * role: AGENT for agent, M16 for headquarter
+     * @param role: AGENT for agent, M16 for headquarter
+     * @param socket: socket
+     * @return void
      */
     if (role == AGENT)
     {

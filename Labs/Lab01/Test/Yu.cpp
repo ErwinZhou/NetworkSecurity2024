@@ -6,6 +6,7 @@
 #include <arpa/inet.h>  // Provides IP address conversion functions
 #include <unistd.h>     // Provides general system call functions
 #include <netdb.h>      // Provides domain name resolution functions
+#include "utils.h"
 using namespace std;
 #define SERVER_PORT 8007
 
@@ -21,6 +22,7 @@ void SecretChat(int nSock, char *pRemoteName, char *pKey)
     nPid = fork();
     if (nPid != 0)
     {
+        // Parent process
         while (1)
         {
             bzero(&strSocketBuffer, BUFFERSIZE);
