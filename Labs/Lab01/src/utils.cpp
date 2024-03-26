@@ -86,7 +86,7 @@ ssize_t TotalRecv(int s, void *buf, size_t len, int flags)
     return nCurSize;
 }
 
-void PhantomHook(int role, int socket)
+void PhantomHook(int role, Agent agent)
 {
     /**
      * Secret Code Name:Phantom Hook
@@ -97,6 +97,8 @@ void PhantomHook(int role, int socket)
      * @param socket: socket
      * @return void
      */
+    int socket = agent.getAgentSocket();
+    string codeName = agent.getAgentCodeName();
     if (role == AGENT)
     {
         // This part is in the agent's side
@@ -115,7 +117,7 @@ void PhantomHook(int role, int socket)
     }
 }
 
-void SilentGuardian(int role, int socket)
+void SilentGuardian(int role, Agent agent, DESUtils des)
 {
     /**
      * Secret Code Name:Silent Guardian
@@ -123,9 +125,12 @@ void SilentGuardian(int role, int socket)
      * In case there is enemy's interception, this will be activated to ensure the safety of the communication
      * The communication is based on the DES algorithm
      * @param role: AGENT for agent, M16 for headquarter
-     * @param socket: socket
+     * @param agent: Agent class object storing the essential information
+     * @param des: DESUtils class object used for encryption and decryption
      * @return void
      */
+    int socket = agent.getAgentSocket();
+    string codeName = agent.getAgentCodeName();
     if (role == AGENT)
     {
         // This part is in the agent's side
@@ -141,5 +146,34 @@ void SilentGuardian(int role, int socket)
         send(socket, "Silent Guardian", 100, 0);
         pid_t nPid;
         nPid = fork();
+        if (nPid != 0)
+        {
+
+            /**
+             * Parent process
+             * In charge of the following:
+             * 1. Receive message from the agent
+             * 2. Decrypt the message
+             * 3. Output the message
+             */
+            char strSocketBuffer[255];
+            while (true)
+            {
+                memset(strSocketBuffer, 0, sizeof(strSocketBuffer));
+                int nLength = 0;
+                nLength = TotalRecv(socket, strSocketBuffer, 255, 0);
+            }
+        }
+        else
+        {
+            /**
+             * Child process
+             * In charge of the following:
+             * 1. Get the message from the headquarter
+             * 2. Encrypt the message
+             * 3. Send the message to the agent
+             */
+        }
     }
+    return;
 }

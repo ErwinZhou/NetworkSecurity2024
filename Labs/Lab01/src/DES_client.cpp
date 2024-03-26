@@ -32,19 +32,19 @@ int main()
      */
     // From the Movie: James Bond
     if (agentName == "James Bond")
-        agentcodeName = "007";
+        agentCodeName = "007";
     // From the Movie: Mission Impossible
     else if (agentName == "David Webb")
-        agentcodeName = "Jason Bourne";
+        agentCodeName = "Jason Bourne";
     // From the Movie: Avengers
     else if (agentName == "Natasha Romanoff")
-        agentcodeName = "Black Widow";
+        agentCodeName = "Black Widow";
     // From the Movie: Mission Impossible
     else if (agentName == "Tom Cruise")
-        agentcodeName = "Ethan Hunt";
+        agentCodeName = "Ethan Hunt";
     // From the Movie: Johnny English
     else if (agentName == "Rowan Atkinson")
-        agentcodeName = "Johnny English";
+        agentCodeName = "Johnny English";
     else
     {
         // If the agent is not one of the following, he has to be a intruder
@@ -56,17 +56,17 @@ int main()
     }
 
     str_time = timeNow();
-    if (agentcodeName != "Black Widow")
-        cout << "<Headquarter::System @ " + str_time + " # Message>:Welcome back, Mr." + agentcodeName + "!" << endl;
+    if (agentCodeName != "Black Widow")
+        cout << "<Headquarter::System @ " + str_time + " # Message>:Welcome back, Mr." + agentCodeName + "!" << endl;
     else
         // Cause Natasha Natasha Romanoff is a lady
-        cout << "<Headquarter::System @ " + str_time + " # Message>:Welcome back, Ms." + agentcodeName + "!" << endl;
-    cout << "-----Agent:" + agentcodeName + "-----" << endl;
+        cout << "<Headquarter::System @ " + str_time + " # Message>:Welcome back, Ms." + agentCodeName + "!" << endl;
+    cout << "-----Agent:" + agentCodeName + "-----" << endl;
     cout << "<Headquarter::System @ " + str_time + " # Message>:The mission is almost ready to launch !" << endl;
-    if (agentcodeName == "Black Widow")
-        cout << "<Headquarter::System @ " + str_time + " # Message>:Please wait for a moment, Ms." + agentcodeName + "!" << endl;
+    if (agentCodeName == "Black Widow")
+        cout << "<Headquarter::System @ " + str_time + " # Message>:Please wait for a moment, Ms." + agentCodeName + "!" << endl;
     else
-        cout << "<Headquarter::System @ " + str_time + " # Message>:Please wait for a moment, Mr." + agentcodeName + "!" << endl;
+        cout << "<Headquarter::System @ " + str_time + " # Message>:Please wait for a moment, Mr." + agentCodeName + "!" << endl;
     cout << "-----Creating Socket-----" << endl;
     // Create a socket
     agentSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -111,7 +111,7 @@ int main()
     }
     // Set the address of the server
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(SERVER_PORT);
+    serverAddr.sin_port = htons(SERVER_PORT + 5);
     serverAddr.sin_addr.s_addr = inet_addr(serverIP.c_str());
 
     // Connect to the server
@@ -128,7 +128,7 @@ int main()
     cout << "<Headquarter::System @ " + str_time + " # Message>:Successfully connected to the Headquarter!" << endl;
 
     // Send the codename to the headquarter
-    send(agentSocket, agentcodeName.c_str(), strlen(agentcodeName.c_str()), 0);
+    send(agentSocket, agentCodeName.c_str(), strlen(agentCodeName.c_str()), 0);
 
     // Fake a emergency
     sleep(3);
@@ -143,33 +143,52 @@ int main()
             if (strcmp(strSocketBuffer, "Phantom Hook") == 0)
             {
                 // Activate the Phantom Hook
-                PhantomHook(AGENT, agentSocket);
+                Agent agent(agentName, agentCodeName, agentSocket);
+                PhantomHook(AGENT, agent);
                 close(agentSocket);
                 return 0;
             }
             else if (strcmp(strSocketBuffer, "Silent Guardian") == 0)
             {
                 // Activate the Silent Guardian
-                SilentGuardian(AGENT, agentSocket);
+                Agent agent(agentName, agentCodeName, agentSocket);
+                SilentGuardian(AGENT, agent, des);
                 close(agentSocket);
                 return 0;
             }
             else
             {
-
                 // Receive the message from the M16
                 des.decrypt(strSocketBuffer, decryptedtext);
                 str_time = timeNow();
-                cout << "<Headquarter::M16 @ " + str_time + " # Message> " << decryptedtext << endl;
-                if (strcmp(strSocketBuffer, "System aborted and files all in ash!") == 0)
+
+                if (strcmp(decryptedtext, "SYSTEM DOWN") == 0)
                 {
-                    cout << "<Headquarter::SYSTEM @ " + str_time + " # Message> " +
+                    cout << "<Headquarter::SYSTEM @ " + str_time + " # WARNING> " +
                                 "Run away, Agent!The Headquarter is down..."
                          << endl;
                     cout << "[*%$$K#$%%SA]You are on your own now......" << endl;
-                    break;
+                    close(agentSocket);
+                    return 0;
                 }
+                else if (strcmp(decryptedtext, "FAKE IDENTITY") == 0)
+                {
+                    /**
+                     * IF the Headquarter is telling back the current person using the secret hideout is ACTUALLY FAKE
+                     * We do not distrub the intruder, we need to let him assume that he is still safe here
+                     * But we need to close the connection
+                     * The M16 will take care of the rest, sending someone to catch the intruder near the hideout
+                     */
+                    cout << "<Headquarter::SYSTEM @ " + str_time + " # Message> " +
+                                "I'm sorry, the Headquarter is not available right now..."
+                         << endl;
+                    cout << "-----Connection Closed-----" << endl;
+                    close(agentSocket);
+                    return 0;
+                }
+                cout << "<Headquarter::M16 @ " + str_time + " # Message> " << decryptedtext << endl;
                 memset(strSocketBuffer, 0, BUFFERSIZE);
+                memset(decryptedtext, 0, 64);
             }
         }
     }

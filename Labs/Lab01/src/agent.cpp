@@ -3,13 +3,13 @@
 Agent::Agent()
 {
     agentName = "";
-    agentcodeName = "";
+    agentCodeName = "";
     agentSocket = 0;
 }
 Agent::Agent(string name, string codeName, int socket)
 {
     agentName = name;
-    agentcodeName = codeName;
+    agentCodeName = codeName;
     agentSocket = socket;
 }
 string Agent::getAgentName()
@@ -20,13 +20,13 @@ void Agent::setAgentName(string name)
 {
     agentName = name;
 }
-string Agent::getAgentcodeName()
+string Agent::getAgentCodeName()
 {
-    return agentcodeName;
+    return agentCodeName;
 }
-void Agent::setAgentcodeName(string codeName)
+void Agent::setAgentCodeName(string codeName)
 {
-    agentcodeName = codeName;
+    agentCodeName = codeName;
 }
 int Agent::getAgentSocket()
 {

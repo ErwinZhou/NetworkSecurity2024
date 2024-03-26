@@ -7,8 +7,7 @@
 #include <arpa/inet.h>  // Provides IP address conversion functions
 #include <unistd.h>     // Provides general system call functions
 #include <netdb.h>      // Provides domain name resolution functions
-#include "DES.h"
-#include "utils.h"
+#include "utils.h"      // utils.h is already includes DES.h and agent.h
 using namespace std;
 #define SERVER_PORT 8007
 #define BUFFERSIZE 1024
@@ -21,7 +20,7 @@ char decryptedtext[64];
 
 /* socket parameters */
 string agentName;
-string agentcodeName;
+string agentCodeName;
 string serverIP = "192.168.126.128";
 int agentSocket;
 struct sockaddr_in serverAddr;

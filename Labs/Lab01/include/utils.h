@@ -5,6 +5,8 @@
 #include <sys/socket.h>
 #include <chrono>
 #include <unistd.h>
+#include "agent.h"
+#include "DES.h"
 using namespace std;
 enum
 {
@@ -17,5 +19,5 @@ string stringBits64(uint64_t num);
 string stringBits32(uint32_t num);
 string timeNow();
 ssize_t TotalRecv(int s, void *buf, size_t len, int flags);
-void PhantomHook(int role, int socket);
-void SilentGuardian(int role, int socket);
+void PhantomHook(int role, Agent agent);
+void SilentGuardian(int role, Agent agent, DESUtils des);

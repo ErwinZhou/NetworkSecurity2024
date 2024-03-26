@@ -12,7 +12,7 @@ class Agent
 {
 private:
     string agentName;
-    string agentcodeName;
+    string agentCodeName;
     int agentSocket;
 
 public:
@@ -21,8 +21,8 @@ public:
     ~Agent(){};
     string getAgentName();
     void setAgentName(string name);
-    string getAgentcodeName();
-    void setAgentcodeName(string codeName);
+    string getAgentCodeName();
+    void setAgentCodeName(string codeName);
     int getAgentSocket();
     void setAgentSocket(int socket);
 };
