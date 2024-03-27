@@ -129,17 +129,9 @@ INT32 DESUtils::extractionBox(uint64_t *data, uint32_t &output)
      * param data: the xored data with 48bits waiting to be extracted to 32bits
      * return: the result of the extraction
      */
-    // uint8_t subData = 0;
-    // std::cout << "data in Binary: ";
-    // for (int i = 0; i < 64; i++)
-    // {
-    //     std::cout << ((*data >> (63 - i)) & 0x1);
-    // }
-    // std::cout << std::endl;
     for (int i = 0; i < 8; i++)
     {
         bitset<6> subDataBits((*data >> (16 + 6 * i)) & 0x3F); // Store 6 bits in a bitset
-
         output |= static_cast<uint32_t>((SBox[7 - i][subDataBits.to_ulong()] | 0x0) << (4 * i));
     }
     return SUCCESS;
@@ -169,42 +161,10 @@ INT32 DESUtils::roundHandler(uint32_t *leftData, uint32_t *rightData, uint64_t *
      */
     // f function for this round
     uint64_t expandedData = 0;
-    // std::cout << "rightData:";
-    // for (int k = 0; k < 4; k++) // Change the loop to iterate over 6 instead of 8
-    // {
-    //     printf("%02X ", (unsigned char)((*rightData >> (24 - 8 * k)) & 0xFF)); // Adjust the shifting to match 32 bits
-    // }
-    // cout << endl;
     expansionBox(rightData, expandedData);
-    // // Display the hexadecimal content of expandedData
-    // std::cout << "expandedData: ";
-    // for (int k = 0; k < 8; k++) // Change the loop to iterate over 6 instead of 8
-    // {
-    //     printf("%02X ", (unsigned char)((expandedData >> (56 - 8 * k)) & 0xFF)); // Adjust the shifting to match 48 bits
-    // }
-    // std::cout << std::endl;
-    // std::cout << "!!!!!!!roundkey!!!!!!:";
-    // for (int k = 0; k < 8; k++) // Change the loop to iterate over 6 instead of 8
-    // {
-    //     printf("%02X ", (unsigned char)((*roundKey >> (56 - 8 * k)) & 0xFF)); // Adjust the shifting to match 48 bits
-    // }
-    // cout << endl;
     expandedData ^= *roundKey;
-    // std::cout << "expandedData after xor: ";
-    // for (int k = 0; k < 6; k++) // Change the loop to iterate over 6 instead of 8
-    // {
-    //     printf("%02X ", (unsigned char)((expandedData >> (56 - 8 * k)) & 0xFF)); // Adjust the shifting to match 48 bits
-    // }
-    // cout << endl;
-
     uint32_t extractedData = 0;
     extractionBox(&expandedData, extractedData);
-    // std::cout << "-------------extractedData:";
-    // for (int i = 31; i >= 0; i--)
-    // {
-    //     std::cout << ((extractedData >> i) & 0x1);
-    // }
-    // cout << endl;
     permutation(&extractedData);
     uint32_t tempLeftData = *leftData;
     *leftData = *rightData;
@@ -259,22 +219,8 @@ void DESUtils::encrypt(const char *plaintext, char *ciphertext)
             if (i == 15)
                 swap(leftData, rightData);
             tempData = ((uint64_t)leftData << 32) | rightData;
-            // // Display the hexadecimal content of tempData
-            // std::cout << "tempData (Hex): ";
-            // for (int k = 0; k < 8; k++)
-            // {
-            //     printf("%02X ", (unsigned char)((tempData >> (56 - 8 * k)) & 0xFF));
-            // }
-            // std::cout << std::endl;
         }
         data = tempData;
-        // Display the hexadecimal content of data
-        // std::cout << "Data before IP^-1(Hex): ";
-        // for (int k = 0; k < 8; k++)
-        // {
-        //     printf("%02X ", (unsigned char)((data >> (56 - 8 * k)) & 0xFF));
-        // }
-        // std::cout << std::endl;
         // IP^-1
         initialPermutationReverse(&data);
         // Convert the 64-bit data back to char array
@@ -294,8 +240,6 @@ void DESUtils::decrypt(const char *ciphertext, char *plaintext)
      */
     // Divide the ciphertext into 64bits in a group
     // Convert the ciphertext from a char array to a vector of uint8_t for further processing
-    cout << "ciphertext: " << ciphertext << endl;
-    cout << "ciphertext length: " << strlen(ciphertext) << endl;
     vector<uint8_t> ciphertextVec(ciphertext, ciphertext + strlen(ciphertext));
     int length = ciphertextVec.size();
     for (int j = 0; j < length; j += 8)
