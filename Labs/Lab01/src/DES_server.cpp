@@ -112,7 +112,7 @@ REBOOT:
     // Bind the socket to the address
     cout << "-----Binding Socket-----" << endl;
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(SERVER_PORT + 5);
+    serverAddr.sin_port = htons(SERVER_PORT);
     serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     if (bind(sListenSocket, (sockaddr *)&serverAddr, sizeof(struct sockaddr)) < 0)
     {
@@ -249,6 +249,8 @@ REBOOT:
                      */
 
                     SilentGuardian(M16, agent, des);
+                    close(sAcceptSocket);
+                    exit(0);
                     return 0;
                     break;
                 case 2:
@@ -261,7 +263,8 @@ REBOOT:
                      * This is a risky move, but it could be a potential strategy
                      */
                     PhantomHook(M16, agent);
-
+                    close(sAcceptSocket);
+                    exit(0);
                     return 0;
                     break;
                 case 3:

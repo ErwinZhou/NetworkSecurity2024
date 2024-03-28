@@ -72,6 +72,14 @@ void signalHandler(int sig)
      */
     exit(0);
 }
+void *logThreadMain(void *arg)
+{
+    /**
+     * Log thread main function
+     * @param arg: argument
+     * @return void
+     */
+}
 ssize_t TotalRecv(int s, void *buf, size_t len, int flags)
 {
     /**
@@ -112,9 +120,131 @@ void PhantomHook(int role, Agent agent)
     {
         // This part is in the agent's side
         string str_time = timeNow();
-        cout << "<Agent::System @ " + str_time + " # Message>:007, we’re reading you loud and clear. Noting happened. Don't worry.Proceed with your update. Over." << endl;
+        cout << "<SecretHideout::System @ " + str_time + " # Message>:We’re reading you loud and clear." << endl;
+        cout << "<SecretHideout::System @ " + str_time + " # Message>:Phantom Hook is activated.." << endl;
+        cout << "<SecretHideout::System @ " + str_time + " # Message>:You know what to do......." << endl;
+        pid_t nPid;
+        nPid = fork();
+        if (nPid != 0)
+        {
+            /**
+             * Parent process
+             * In charge of the following:
+             * 1. Receive message from the headquarter
+             * 2. Output the message
+             */
+            char strSocketBuffer[255];
+            // Register the signal handler
+            signal(SIGTERM, signalHandler);
+            while (true)
+            {
+                memset(strSocketBuffer, 0, sizeof(strSocketBuffer));
+                int nLength = 0;
+                // Using the TotalRecv function to ensure all data is received
+                nLength = TotalRecv(socket, strSocketBuffer, 255, 0);
+                if (nLength == 255)
+                {
+                    // Normal Case
+                    if (strSocketBuffer[0] != 0 && strSocketBuffer[0] != '\n')
+                    {
+                        // Fix the problem of the sudden message at the same line of "Please Enter:"
+                        cout << endl;
+                        string str_time = timeNow();
+                        cout << "<SecretHideout::Headquarter @ " + str_time + " # Message>: " + strSocketBuffer;
+                        if (memcmp("OVER", strSocketBuffer, 4) == 0)
+                        {
+                            // If the message the agent received is "OVER"
+                            // It means the Headquarter is done communicating
+                            string str_time = timeNow();
+                            cout << "<SecretHideout::System @ " + str_time + " # Message>:The Headquarter is off the line." << endl;
+                            cout << "<SecretHideout::System @ " + str_time + " # Message>:Communication is OVER." << endl;
+                            cout << "-----Communication OVER-----" << endl;
+                            kill(nPid, SIGTERM);
+                            return;
+                        }
+                        else if (memcmp("COMMUNICATION ERROR", strSocketBuffer, 19) == 0)
+                        {
+                            // If the message the agent received is "COMMUNICATION ERROR"
+                            // It means there is a problem with the communication
+                            string str_time = timeNow();
+                            cout << "<SecretHideout::System @ " + str_time + " # Message>:There is a problem with the communication..." << endl;
+                            cout << "-----Shutdown Communication-----" << endl;
+                            kill(nPid, SIGTERM);
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    // If the message is not 255 bytes
+                    // There is a problem with the communication
+                    string str_time = timeNow();
+                    cout << "<SecretHideout::System @ " + str_time + " # Message>: There is a problem with the communication..." << endl;
+                    cout << "-----Shutdown Communication-----" << endl;
+                    char *hint = "COMMUNICATION ERROR";
+                    send(socket, hint, 100, 0);
+                    kill(nPid, SIGTERM);
+                    return;
+                }
+            }
+        }
+        else
+        {
+            /**
+             * Child process
+             * In charge of the following:
+             * 1. Get the message from the agent
+             * 2. Send the message to the headquarter
+             */
+            char strStdinBuffer[255];
+            // Register the signal handler
+            signal(SIGTERM, signalHandler);
+            while (true)
+            {
+                memset(strStdinBuffer, 0, sizeof(strStdinBuffer));
+                cout << "Please Enter:";
+                // Get the message from the agent
+                // if (fgets(strStdinBuffer, 255, stdin) == NULL)
+                // {
+                //     continue;
+                // }
+                cout << "Please Enter:";
+                cin.getline(strStdinBuffer, 255);
+                int nLen = 255;
+                // Send the message to the agent
+                if (send(socket, strStdinBuffer, sizeof(strStdinBuffer), 0) != 255)
+                {
+                    // If the message is not 255 bytes
+                    // There is a problem with the communication
+                    string str_time = timeNow();
+                    cout << "<SecretHideout::System @ " + str_time + " # Message>: There is a problem with the communication..." << endl;
+                    cout << "-----Shutdown Communication-----" << endl;
+                    char *hint = "COMMUNICATION ERROR";
+                    send(socket, hint, 100, 0);
+                    kill(getppid(), SIGTERM);
+                    return;
+                }
+                else
+                {
+                    if (memcmp("OVER", strStdinBuffer, 4) == 0)
+                    {
+                        // If the message the agent sent is "OVER"
+                        // It means the agent is done communicating
+                        string str_time = timeNow();
+                        cout << "<SecretHideout::System @ " + str_time + " # Message>:Communication is OVER." << endl;
+                        cout << "-----Communication OVER-----" << endl;
+                        // Tell the headquarter the communication is over
+                        send(socket, "OVER", 100, 0);
+                        // Put an end to the the parent process
+                        kill(getppid(), SIGTERM);
+                        return;
+                    }
+                }
+                cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Message Sent." << endl;
+            }
+        }
     }
-    else
+    else if (role == M16)
     {
         // This part is in the headquarter's side
         string str_time = timeNow();
@@ -123,9 +253,127 @@ void PhantomHook(int role, Agent agent)
         send(socket, "Phantom Hook", 100, 0);
         pid_t nPid;
         nPid = fork();
+        if (nPid != 0)
+        {
+            /**
+             * Parent process
+             * In charge of the following:
+             * 1. Receive message from the agent
+             * 2. Output the message
+             */
+            char strSocketBuffer[255];
+            // Register the signal handler
+            signal(SIGTERM, signalHandler);
+            while (true)
+            {
+                memset(strSocketBuffer, 0, sizeof(strSocketBuffer));
+                int nLength = 0;
+                // Using the TotalRecv function to ensure all data is received
+                nLength = TotalRecv(socket, strSocketBuffer, 255, 0);
+                if (nLength == 255)
+                {
+                    // Normal Case
+                    if (strSocketBuffer[0] != 0 && strSocketBuffer[0] != '\n')
+                    {
+                        // Fix the problem of the sudden message at the same line of "Please Enter:"
+                        cout << endl;
+                        string str_time = timeNow();
+                        cout << "<Headquarter::" + codeName + " @ " + str_time + " # Message>: " + strSocketBuffer << endl;
+                        if (memcmp("OVER", strSocketBuffer, 4) == 0)
+                        {
+                            // If the message the headquarter received is "OVER"
+                            // It means the agent is done communicating
+                            string str_time = timeNow();
+                            cout << "<Headquarter::System @ " + str_time + " # Message>:Agent OUT." << endl;
+                            cout << "<Headquarter::System @ " + str_time + " # Message>:Communication is OVER." << endl;
+                            cout << "-----Communication OVER-----" << endl;
+                            kill(nPid, SIGTERM);
+                            return;
+                        }
+                        else if (memcmp("COMMUNICATION ERROR", strSocketBuffer, 19) == 0)
+                        {
+                            // If the message the headquarter received is "COMMUNICATION ERROR"
+                            // It means there is a problem with the communication
+                            string str_time = timeNow();
+                            cout << "<Headquarter::System @ " + str_time + " # Message>:There is a problem with the communication..." << endl;
+                            cout << "-----Shutdown Communication-----" << endl;
+                            kill(nPid, SIGTERM);
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    // If the message is not 255 bytes
+                    // There is a problem with the communication
+                    string str_time = timeNow();
+                    cout << "<Headquarter::System @ " + str_time + " # Message>: There is a problem with the communication..." << endl;
+                    cout << "-----Shutdown Communication-----" << endl;
+                    char *hint = "COMMUNICATION ERROR";
+                    send(socket, hint, 100, 0);
+                    kill(nPid, SIGTERM);
+                    return;
+                }
+            }
+        }
+        else
+        {
+            /**
+             * Child process
+             * In charge of the following:
+             * 1. Get the message from the headquarter
+             * 2. Send the message to the agent
+             */
+            char strStdinBuffer[255];
+            // Register the signal handler
+            signal(SIGTERM, signalHandler);
+            while (true)
+            {
+                memset(strStdinBuffer, 0, sizeof(strStdinBuffer));
+                cout << "Please Enter:";
+                // Get the message from the headquarter
+                // if (fgets(strStdinBuffer, 255, stdin) == NULL)
+                // {
+                //     continue;
+                // }
+                cout << "Please Enter:";
+                cin.getline(strStdinBuffer, 255);
+                int nLen = 255;
+                // Send the message to the agent
+                if (send(socket, strStdinBuffer, sizeof(strStdinBuffer), 0) != 255)
+                {
+                    // If the message is not 255 bytes
+                    // There is a problem with the communication
+                    string str_time = timeNow();
+                    cout << "<Headquarter::System @ " + str_time + " # Message>: There is a problem with the communication..." << endl;
+                    cout << "-----Shutdown Communication-----" << endl;
+                    char *hint = "COMMUNICATION ERROR";
+                    send(socket, hint, 100, 0);
+                    // Put an end to the the parent process
+                    kill(getppid(), SIGTERM);
+                    return;
+                }
+                else
+                {
+                    if (memcmp("OVER", strStdinBuffer, 4) == 0)
+                    {
+                        // If the message the headquarter sent is "OVER"
+                        // It means the headquarter is done communicating
+                        string str_time = timeNow();
+                        cout << "<Headquarter::System @ " + str_time + " # Message>:Communication is OVER." << endl;
+                        cout << "-----Communication OVER-----" << endl;
+                        // Tell the agent the communication is over
+                        send(socket, "OVER", 100, 0);
+                        // Put an end to the the parent process
+                        kill(getppid(), SIGTERM);
+                        return;
+                    }
+                }
+                cout << "<Headquarter::System @ " + timeNow() + " # Message>:Message Sent." << endl;
+            }
+        }
     }
 }
-
 void SilentGuardian(int role, Agent agent, DESUtils des)
 {
     /**
@@ -174,20 +422,39 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                 if (nLength == 255)
                 {
                     // Normal Case
+                    // // If the message is "Please Enter:"
+                    // // Output the message right away
+                    // if (memcmp("Please Enter:", strSocketBuffer, 13) == 0)
+                    // {
+                    //     cout << strSocketBuffer;
+                    //     continue;
+                    // }
                     des.decrypt(strSocketBuffer, decryptedtext);
                     decryptedtext[254] = 0;
                     if (decryptedtext[0] != 0 && decryptedtext[0] != '\n')
                     {
+                        // Fix the problem of the sudden message at the same line of "Please Enter:"
+                        cout << endl;
                         string str_time = timeNow();
-                        cout << "<SecretHideout::Headquarter @ " + str_time + " # Message>: " + decryptedtext << endl;
+                        cout << "<SecretHideout::Headquarter @ " + str_time + " # Message>: " + decryptedtext;
                         if (memcmp("OVER", decryptedtext, 4) == 0)
                         {
                             // If the message the agent received is "OVER"
                             // It means the Headquarter is done communicating
                             string str_time = timeNow();
                             cout << "<SecretHideout::System @ " + str_time + " # Message>:The Headquarter is off the line." << endl;
-                            cout << "SecretHideout::System @ " + str_time + " # Message>:Communication is OVER." << endl;
+                            cout << "<SecretHideout::System @ " + str_time + " # Message>:Communication is OVER." << endl;
                             cout << "-----Communication OVER-----" << endl;
+                            kill(nPid, SIGTERM);
+                            return;
+                        }
+                        else if (memcmp("COMMUNICATION ERROR", decryptedtext, 19) == 0)
+                        {
+                            // If the message the agent received is "COMMUNICATION ERROR"
+                            // It means there is a problem with the communication
+                            string str_time = timeNow();
+                            cout << "<SecretHideout::System @ " + str_time + " # Message>:There is a problem with the communication..." << endl;
+                            cout << "-----Shutdown Communication-----" << endl;
                             kill(nPid, SIGTERM);
                             return;
                         }
@@ -201,6 +468,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                     cout << "<SecretHideout::System @ " + str_time + " # Message>: There is a problem with the communication..." << endl;
                     cout << "-----Shutdown Communication-----" << endl;
                     char *hint = "COMMUNICATION ERROR";
+                    memset(encryedtext, 0, sizeof(encryedtext));
                     des.encrypt(hint, encryedtext);
                     send(socket, encryedtext, sizeof(encryedtext), 0);
                     kill(nPid, SIGTERM);
@@ -215,7 +483,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
              * In charge of the following:
              * 1. Get the message from the agent
              * 2. Encrypt the message
-             * 3. Send the message to the agent
+             * 3. Send the message to the headquarter
              */
             char strStdinBuffer[255];
             char encryedtext[255];
@@ -227,12 +495,14 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                 memset(strStdinBuffer, 0, sizeof(strStdinBuffer));
                 memset(encryedtext, 0, sizeof(encryedtext));
                 memset(decryptedtext, 0, sizeof(decryptedtext));
-                cout << "Please Enter:";
                 // Get the message from the agent
-                if (fgets(strStdinBuffer, 255, stdin) == NULL)
-                {
-                    continue;
-                }
+                // if (fgets(strStdinBuffer, 255, stdin) == NULL)
+                // {
+                //     continue;
+                // }
+                cout << "Please Enter:";
+                cin.getline(strStdinBuffer, 255);
+                // send(socket, "Please Enter:", 100, 0);
                 int nLen = 255;
                 // Encrypt the message
                 des.encrypt(strStdinBuffer, encryedtext);
@@ -245,6 +515,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                     cout << "<SecretHideout::System @ " + str_time + " # Message>: There is a problem with the communication..." << endl;
                     cout << "-----Shutdown Communication-----" << endl;
                     char *hint = "COMMUNICATION ERROR";
+                    memset(encryedtext, 0, sizeof(encryedtext));
                     des.encrypt(hint, encryedtext);
                     send(socket, encryedtext, sizeof(encryedtext), 0);
                     // Put an end to the the parent process
@@ -262,12 +533,14 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                         cout << "-----Communication OVER-----" << endl;
                         // Tell the headquarter the communication is over
                         char *hint = "OVER";
+                        memset(encryedtext, 0, sizeof(encryedtext));
                         des.encrypt(hint, encryedtext);
                         send(socket, encryedtext, sizeof(encryedtext), 0);
                         // Put an end to the the parent process
                         kill(getppid(), SIGTERM);
                         return;
                     }
+                    cout << "<Headquarter::System @ " + timeNow() + " # Message>:Message Sent." << endl;
                 }
             }
         }
@@ -296,6 +569,11 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
             char decryptedtext[255];
             // Register the signal handler
             signal(SIGTERM, signalHandler);
+            do
+            {
+
+            } while (true);
+
             while (true)
             {
                 memset(strSocketBuffer, 0, sizeof(strSocketBuffer));
@@ -307,12 +585,21 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                 if (nLength == 255)
                 {
                     // Normal Case
+                    // // If the message is "Please Enter:"
+                    // // Output the message right away
+                    // if (memcmp("Please Enter:", strSocketBuffer, 13) == 0)
+                    // {
+                    //     cout << strSocketBuffer;
+                    //     continue;
+                    // }
                     des.decrypt(strSocketBuffer, decryptedtext);
                     decryptedtext[254] = 0;
                     if (decryptedtext[0] != 0 && decryptedtext[0] != '\n')
                     {
+                        // Fix the problem of the sudden message at the same line of "Please Enter:"
+                        cout << endl;
                         string str_time = timeNow();
-                        cout << "<Headquarter::" + codeName + " @ " + str_time + " # Message>: " + decryptedtext << endl;
+                        cout << "<Headquarter::" + codeName + " @ " + str_time + " # Message>: " + decryptedtext;
                         if (memcmp("OVER", decryptedtext, 4) == 0)
                         {
                             // If the message the headquarter received is "OVER"
@@ -321,6 +608,16 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                             cout << "<Headquarter::System @ " + str_time + " # Message>:Agent OUT." << endl;
                             cout << "<Headquarter::System @ " + str_time + " # Message>:Communication is OVER." << endl;
                             cout << "-----Communication OVER-----" << endl;
+                            kill(nPid, SIGTERM);
+                            return;
+                        }
+                        else if (memcmp("COMMUNICATION ERROR", decryptedtext, 19) == 0)
+                        {
+                            // If the message the headquarter received is "COMMUNICATION ERROR"
+                            // It means there is a problem with the communication
+                            string str_time = timeNow();
+                            cout << "<Headquarter::System @ " + str_time + " # Message>:There is a problem with the communication..." << endl;
+                            cout << "-----Shutdown Communication-----" << endl;
                             kill(nPid, SIGTERM);
                             return;
                         }
@@ -334,6 +631,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                     cout << "<Headquarter::System @ " + str_time + " # Message>: There is a problem with the communication..." << endl;
                     cout << "-----Shutdown Communication-----" << endl;
                     char *hint = "COMMUNICATION ERROR";
+                    memset(encryedtext, 0, sizeof(encryedtext));
                     des.encrypt(hint, encryedtext);
                     send(socket, encryedtext, sizeof(encryedtext), 0);
                     kill(nPid, SIGTERM);
@@ -360,12 +658,14 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                 memset(strStdinBuffer, 0, sizeof(strStdinBuffer));
                 memset(encryedtext, 0, sizeof(encryedtext));
                 memset(decryptedtext, 0, sizeof(decryptedtext));
-                cout << "Please Enter:";
                 // Get the message from the headquarter
-                if (fgets(strStdinBuffer, 255, stdin) == NULL)
-                {
-                    continue;
-                }
+                // if (fgets(strStdinBuffer, 255, stdin) == NULL)
+                // {
+                //     continue;
+                // }
+                cout << "Please Enter:";
+                cin.getline(strStdinBuffer, 255);
+                // send(socket, "Please Enter:", 100, 0);
                 int nLen = 255;
                 // Encrypt the message
                 des.encrypt(strStdinBuffer, encryedtext);
@@ -378,6 +678,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                     cout << "<Headquarter::System @ " + str_time + " # Message>: There is a problem with the communication..." << endl;
                     cout << "-----Shutdown Communication-----" << endl;
                     char *hint = "COMMUNICATION ERROR";
+                    memset(encryedtext, 0, sizeof(encryedtext));
                     des.encrypt(hint, encryedtext);
                     send(socket, encryedtext, sizeof(encryedtext), 0);
                     // Put an end to the the parent process
@@ -395,6 +696,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                         cout << "-----Communication OVER-----" << endl;
                         // Tell the agent the communication is over
                         char *hint = "OVER";
+                        memset(encryedtext, 0, sizeof(encryedtext));
                         des.encrypt(hint, encryedtext);
                         send(socket, encryedtext, sizeof(encryedtext), 0);
                         // Put an end to the the parent process
@@ -402,6 +704,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                         return;
                     }
                 }
+                cout << "<Headquarter::System @ " + timeNow() + " # Message>:Message Sent." << endl;
             }
         }
     }

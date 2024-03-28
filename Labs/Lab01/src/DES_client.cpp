@@ -111,7 +111,7 @@ int main()
     }
     // Set the address of the server
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(SERVER_PORT + 5);
+    serverAddr.sin_port = htons(SERVER_PORT);
     serverAddr.sin_addr.s_addr = inet_addr(serverIP.c_str());
 
     // Connect to the server

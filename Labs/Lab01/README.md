@@ -14,10 +14,12 @@
                 "${file}",
                 "~/lab/labcodes/TechnologiesOfNetworkSecurity/Labs/Lab01/src/utils.cpp",
                 "~/lab/labcodes/TechnologiesOfNetworkSecurity/Labs/Lab01/src/DES.cpp",
+                "~/lab/labcodes/TechnologiesOfNetworkSecurity/Labs/Lab01/src/agent.cpp",
                 "-I",
                 "~/lab/labcodes/TechnologiesOfNetworkSecurity/Labs/Lab01/include",
                 "-o",
-                "${fileDirname}/../bin/${fileBasenameNoExtension}.exe"
+                "${fileDirname}/../bin/${fileBasenameNoExtension}.exe",
+                "-lpthread"
             ],
             "options": {
                 "cwd": "${fileDirname}"
@@ -64,6 +66,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "~/lab/labcodes/TechnologiesOfNetworkSecurity/Labs/Lab01/include",
+                "/usr/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",
