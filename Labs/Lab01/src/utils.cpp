@@ -120,6 +120,7 @@ void PhantomHook(int role, Agent agent)
     {
         // This part is in the agent's side
         string str_time = timeNow();
+        bool control_flag = false;
         cout << "<SecretHideout::System @ " + str_time + " # Message>:We’re reading you loud and clear." << endl;
         cout << "<SecretHideout::System @ " + str_time + " # Message>:Phantom Hook is activated.." << endl;
         cout << "<SecretHideout::System @ " + str_time + " # Message>:You know what to do......." << endl;
@@ -150,7 +151,7 @@ void PhantomHook(int role, Agent agent)
                         // Fix the problem of the sudden message at the same line of "Please Enter:"
                         cout << endl;
                         string str_time = timeNow();
-                        cout << "<SecretHideout::Headquarter @ " + str_time + " # Message>: " + strSocketBuffer;
+                        cout << "<SecretHideout::Headquarter @ " + str_time + " # Message>: " + strSocketBuffer << endl;
                         if (memcmp("OVER", strSocketBuffer, 4) == 0)
                         {
                             // If the message the agent received is "OVER"
@@ -202,13 +203,11 @@ void PhantomHook(int role, Agent agent)
             while (true)
             {
                 memset(strStdinBuffer, 0, sizeof(strStdinBuffer));
-                cout << "Please Enter:";
                 // Get the message from the agent
                 // if (fgets(strStdinBuffer, 255, stdin) == NULL)
                 // {
                 //     continue;
                 // }
-                cout << "Please Enter:";
                 cin.getline(strStdinBuffer, 255);
                 int nLen = 255;
                 // Send the message to the agent
@@ -240,7 +239,9 @@ void PhantomHook(int role, Agent agent)
                         return;
                     }
                 }
-                cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Message Sent." << endl;
+                if (control_flag)
+                    cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Message Sent." << endl;
+                control_flag = true;
             }
         }
     }
@@ -248,6 +249,7 @@ void PhantomHook(int role, Agent agent)
     {
         // This part is in the headquarter's side
         string str_time = timeNow();
+        bool control_flag = false;
         cout << "<Headquarter::System @ " + str_time + " # Message>:Phantom Hook is activated." << endl;
         // Notify the agent to also activate the Phantom Hook
         send(socket, "Phantom Hook", 100, 0);
@@ -330,13 +332,11 @@ void PhantomHook(int role, Agent agent)
             while (true)
             {
                 memset(strStdinBuffer, 0, sizeof(strStdinBuffer));
-                cout << "Please Enter:";
                 // Get the message from the headquarter
                 // if (fgets(strStdinBuffer, 255, stdin) == NULL)
                 // {
                 //     continue;
                 // }
-                cout << "Please Enter:";
                 cin.getline(strStdinBuffer, 255);
                 int nLen = 255;
                 // Send the message to the agent
@@ -369,7 +369,9 @@ void PhantomHook(int role, Agent agent)
                         return;
                     }
                 }
-                cout << "<Headquarter::System @ " + timeNow() + " # Message>:Message Sent." << endl;
+                if (control_flag)
+                    cout << "<Headquarter::System @ " + timeNow() + " # Message>:Message Sent." << endl;
+                control_flag = true;
             }
         }
     }
@@ -392,6 +394,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
     {
         // This part is in the agent's side
         string str_time = timeNow();
+        bool control_flag = false;
         cout << "<SecretHideout::System @ " + str_time + " # Message>:All channels have been compromised!" << endl;
         cout << "<SecretHideout::System @ " + str_time + " # Message>:Silent Guardian is activated.." << endl;
         pid_t nPid;
@@ -422,13 +425,6 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                 if (nLength == 255)
                 {
                     // Normal Case
-                    // // If the message is "Please Enter:"
-                    // // Output the message right away
-                    // if (memcmp("Please Enter:", strSocketBuffer, 13) == 0)
-                    // {
-                    //     cout << strSocketBuffer;
-                    //     continue;
-                    // }
                     des.decrypt(strSocketBuffer, decryptedtext);
                     decryptedtext[254] = 0;
                     if (decryptedtext[0] != 0 && decryptedtext[0] != '\n')
@@ -436,7 +432,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                         // Fix the problem of the sudden message at the same line of "Please Enter:"
                         cout << endl;
                         string str_time = timeNow();
-                        cout << "<SecretHideout::Headquarter @ " + str_time + " # Message>: " + decryptedtext;
+                        cout << "<SecretHideout::Headquarter @ " + str_time + " # Message>: " + decryptedtext << endl;
                         if (memcmp("OVER", decryptedtext, 4) == 0)
                         {
                             // If the message the agent received is "OVER"
@@ -495,14 +491,9 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                 memset(strStdinBuffer, 0, sizeof(strStdinBuffer));
                 memset(encryedtext, 0, sizeof(encryedtext));
                 memset(decryptedtext, 0, sizeof(decryptedtext));
+
                 // Get the message from the agent
-                // if (fgets(strStdinBuffer, 255, stdin) == NULL)
-                // {
-                //     continue;
-                // }
-                cout << "Please Enter:";
                 cin.getline(strStdinBuffer, 255);
-                // send(socket, "Please Enter:", 100, 0);
                 int nLen = 255;
                 // Encrypt the message
                 des.encrypt(strStdinBuffer, encryedtext);
@@ -524,6 +515,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                 }
                 else
                 {
+
                     if (memcmp("OVER", strStdinBuffer, 4) == 0)
                     {
                         // If the message the agent sent is "OVER"
@@ -540,7 +532,9 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                         kill(getppid(), SIGTERM);
                         return;
                     }
-                    cout << "<Headquarter::System @ " + timeNow() + " # Message>:Message Sent." << endl;
+                    if (control_flag)
+                        cout << "<Headquarter::System @ " + timeNow() + " # Message>:Message Sent." << endl;
+                    control_flag = true;
                 }
             }
         }
@@ -549,6 +543,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
     {
         // This part is in the headquarter's side
         string str_time = timeNow();
+        bool control_flag = false;
         cout << "<Headquarter::System @ " + str_time + " # Message>:Silent Guardian is activated.." << endl;
         // Notify the agent to also activate the Silent Guardian
         send(socket, "Silent Guardian", 100, 0);
@@ -567,13 +562,9 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
             char strSocketBuffer[255];
             char encryedtext[255];
             char decryptedtext[255];
+
             // Register the signal handler
             signal(SIGTERM, signalHandler);
-            do
-            {
-
-            } while (true);
-
             while (true)
             {
                 memset(strSocketBuffer, 0, sizeof(strSocketBuffer));
@@ -585,13 +576,6 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                 if (nLength == 255)
                 {
                     // Normal Case
-                    // // If the message is "Please Enter:"
-                    // // Output the message right away
-                    // if (memcmp("Please Enter:", strSocketBuffer, 13) == 0)
-                    // {
-                    //     cout << strSocketBuffer;
-                    //     continue;
-                    // }
                     des.decrypt(strSocketBuffer, decryptedtext);
                     decryptedtext[254] = 0;
                     if (decryptedtext[0] != 0 && decryptedtext[0] != '\n')
@@ -599,7 +583,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                         // Fix the problem of the sudden message at the same line of "Please Enter:"
                         cout << endl;
                         string str_time = timeNow();
-                        cout << "<Headquarter::" + codeName + " @ " + str_time + " # Message>: " + decryptedtext;
+                        cout << "<Headquarter::" + codeName + " @ " + str_time + " # Message>: " + decryptedtext << endl;
                         if (memcmp("OVER", decryptedtext, 4) == 0)
                         {
                             // If the message the headquarter received is "OVER"
@@ -659,13 +643,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                 memset(encryedtext, 0, sizeof(encryedtext));
                 memset(decryptedtext, 0, sizeof(decryptedtext));
                 // Get the message from the headquarter
-                // if (fgets(strStdinBuffer, 255, stdin) == NULL)
-                // {
-                //     continue;
-                // }
-                cout << "Please Enter:";
                 cin.getline(strStdinBuffer, 255);
-                // send(socket, "Please Enter:", 100, 0);
                 int nLen = 255;
                 // Encrypt the message
                 des.encrypt(strStdinBuffer, encryedtext);
@@ -704,7 +682,9 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
                         return;
                     }
                 }
-                cout << "<Headquarter::System @ " + timeNow() + " # Message>:Message Sent." << endl;
+                if (control_flag)
+                    cout << "<Headquarter::System @ " + timeNow() + " # Message>:Message Sent." << endl;
+                control_flag = true;
             }
         }
     }
