@@ -72,14 +72,6 @@ void signalHandler(int sig)
      */
     exit(0);
 }
-void *logThreadMain(void *arg)
-{
-    /**
-     * Log thread main function
-     * @param arg: argument
-     * @return void
-     */
-}
 ssize_t TotalRecv(int s, void *buf, size_t len, int flags)
 {
     /**
@@ -204,10 +196,6 @@ void PhantomHook(int role, Agent agent)
             {
                 memset(strStdinBuffer, 0, sizeof(strStdinBuffer));
                 // Get the message from the agent
-                // if (fgets(strStdinBuffer, 255, stdin) == NULL)
-                // {
-                //     continue;
-                // }
                 cin.getline(strStdinBuffer, 255);
                 int nLen = 255;
                 // Send the message to the agent

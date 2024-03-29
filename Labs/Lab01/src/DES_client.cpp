@@ -33,7 +33,7 @@ int main()
     // From the Movie: James Bond
     if (agentName == "James Bond")
         agentCodeName = "007";
-    // From the Movie: Mission Impossible
+    // From the Movie: The Bourne Identity
     else if (agentName == "David Webb")
         agentCodeName = "Jason Bourne";
     // From the Movie: Avengers
