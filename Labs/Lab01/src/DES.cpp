@@ -276,58 +276,58 @@ void DESUtils::decrypt(const char *ciphertext, char *plaintext)
     plaintext[plaintextVec.size()] = '\0';
     return;
 }
-int main()
-{
-    DESUtils des;
-    char *plaintext = "123456"; // 原始明文
-    char ciphertext[64];        // 存储加密后的密文
-    char decryptedtext[64];     // 存储解密后的文本
+// int main()
+// {
+//     DESUtils des;
+//     char *plaintext = "123456"; // 原始明文
+//     char ciphertext[64];        // 存储加密后的密文
+//     char decryptedtext[64];     // 存储解密后的文本
 
-    // 清零
-    memset(ciphertext, 0, sizeof(ciphertext));
-    memset(decryptedtext, 0, sizeof(decryptedtext));
-    uint64_t key = 0x133457799BBCDFF1;
-    des.genKey(&key);
-    // 输出16轮密钥
-    cout << "Round Keys: " << endl;
-    for (int i = 0; i < 16; i++)
-    {
-        cout << "Round " << i + 1 << ": " << hex << showbase << des.roundKeys[i] << endl;
-    }
-    // 加密
-    cout << "Encrypting..." << endl;
-    des.encrypt(plaintext, ciphertext);
-    cout << "plaintext: " << plaintext << endl;
-    for (int i = 0; i < strlen(plaintext); i++)
-    {
-        printf("%02x ", (unsigned char)plaintext[i]);
-    }
-    printf("\n");
-    cout << "ciphertext: " << ciphertext << endl;
-    for (int i = 0; i < strlen(ciphertext); i++)
-    {
-        printf("%02x ", (unsigned char)ciphertext[i]);
-    }
-    printf("\n");
-    // 解密
-    cout << "Decrypting..." << endl;
-    des.decrypt(ciphertext, decryptedtext);
+//     // 清零
+//     memset(ciphertext, 0, sizeof(ciphertext));
+//     memset(decryptedtext, 0, sizeof(decryptedtext));
+//     uint64_t key = 0x133457799BBCDFF1;
+//     des.genKey(&key);
+//     // 输出16轮密钥
+//     cout << "Round Keys: " << endl;
+//     for (int i = 0; i < 16; i++)
+//     {
+//         cout << "Round " << i + 1 << ": " << hex << showbase << des.roundKeys[i] << endl;
+//     }
+//     // 加密
+//     cout << "Encrypting..." << endl;
+//     des.encrypt(plaintext, ciphertext);
+//     cout << "plaintext: " << plaintext << endl;
+//     for (int i = 0; i < strlen(plaintext); i++)
+//     {
+//         printf("%02x ", (unsigned char)plaintext[i]);
+//     }
+//     printf("\n");
+//     cout << "ciphertext: " << ciphertext << endl;
+//     for (int i = 0; i < strlen(ciphertext); i++)
+//     {
+//         printf("%02x ", (unsigned char)ciphertext[i]);
+//     }
+//     printf("\n");
+//     // 解密
+//     cout << "Decrypting..." << endl;
+//     des.decrypt(ciphertext, decryptedtext);
 
-    cout << "strlen(decryptedtext): " << strlen(decryptedtext) << endl;
-    for (int i = 0; i < strlen(decryptedtext); i++)
-    {
-        printf("%02x ", (unsigned char)decryptedtext[i]);
-    }
-    printf("\n");
-    // 检查解密后的文本是否与原始明文相同
-    if (strcmp(plaintext, decryptedtext) == 0)
-    {
-        std::cout << "DES encryption and decryption are correct!" << std::endl;
-    }
-    else
-    {
-        std::cout << "Error in DES encryption or decryption." << std::endl;
-    }
+//     cout << "strlen(decryptedtext): " << strlen(decryptedtext) << endl;
+//     for (int i = 0; i < strlen(decryptedtext); i++)
+//     {
+//         printf("%02x ", (unsigned char)decryptedtext[i]);
+//     }
+//     printf("\n");
+//     // 检查解密后的文本是否与原始明文相同
+//     if (strcmp(plaintext, decryptedtext) == 0)
+//     {
+//         std::cout << "DES encryption and decryption are correct!" << std::endl;
+//     }
+//     else
+//     {
+//         std::cout << "Error in DES encryption or decryption." << std::endl;
+//     }
 
-    return 0;
-}
+//     return 0;
+// }

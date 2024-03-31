@@ -1,5 +1,12 @@
-# Lab01-TCP Chat Room using DES Encryption
-## Important Details
+# TechnologiesOfNetworkSecurity
+## Lab01-TCP Chat Room using DES Encryption
+This project is to implement a simple chat room based on TCP protocol, and use **DES encryption** algorithm to encrypt the communication content. I creatively designed it based on **Special Service and Agent Theme**, which I though would be much fun.
+* Platform: Linux
+* Language: C++
+* Theme: Special Service
+It is welcome and open to all issues around the project
+Feel free to contact me on ErwinZhou@outlook.com
+*To be continued......*
 ### Task.json
 ```
 {
@@ -18,8 +25,7 @@
                 "-I",
                 "~/lab/labcodes/TechnologiesOfNetworkSecurity/Labs/Lab01/include",
                 "-o",
-                "${fileDirname}/../bin/${fileBasenameNoExtension}.exe",
-                "-lpthread"
+                "${fileDirname}/../bin/${fileBasenameNoExtension}.exe"
             ],
             "options": {
                 "cwd": "${fileDirname}"
