@@ -1,14 +1,23 @@
 #include <cstdint>
 #include <utility>
 #include <iostream>
+#include <random>
 using namespace std;
 class RSAUtils
 {
 public:
-    RSAUtils();
-    ~RSAUtils();
+    RSAUtils(){};
+    ~RSAUtils(){};
 
 private:
+    // enum for prime test approach
+    enum
+    {
+        MILLER_RABIN = 0,
+        EUCLIDIAN = 1,
+        FERMAT = 2
+    };
+
     // uint64_t gcd(uint64_t a, uint64_t b);
     // pair<uint64_t, uint64_t> extendedEuclidean(uint64_t a, uint64_t b);
     // uint64_t modInverse(uint64_t a, uint64_t m);
@@ -17,6 +26,14 @@ private:
     // uint64_t generateD(uint64_t e, uint64_t phi);
     uint64_t mulMod(uint64_t a, uint64_t b, uint64_t n);
     uint64_t powMod(uint64_t base, uint64_t pow, uint64_t n);
+    // Prime test algorithms
+    bool MillerRabin(uint64_t n);
+    /* Continuing to implement Fermat and Euclidan for Prime Test */
+    bool primeTest(uint64_t n, int approach, int rounds);
+    // Generate random prime number
+    void generateRamdomPrime(uint64_t &p, uint64_t &q);
+    // Greatest common divisor
+    uint64_t gcd(uint64_t a, uint64_t b);
 
     /**
      * Prime number p & q
