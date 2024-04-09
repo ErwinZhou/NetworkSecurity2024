@@ -8,33 +8,39 @@ class RSAUtils
 public:
     RSAUtils(){};
     ~RSAUtils(){};
+    pair<uint64_t, uint64_t> getPublicKey();
+    pair<uint64_t, uint64_t> getPrivateKey();
 
 private:
     // enum for prime test approach
     enum
     {
         MILLER_RABIN = 0,
-        EUCLIDIAN = 1,
+        EUCLIDEAN = 1,
         FERMAT = 2
     };
-
-    // uint64_t gcd(uint64_t a, uint64_t b);
-    // pair<uint64_t, uint64_t> extendedEuclidean(uint64_t a, uint64_t b);
-    // uint64_t modInverse(uint64_t a, uint64_t m);
-    // uint64_t generatePrime();
-    // uint64_t generateE(uint64_t phi);
-    // uint64_t generateD(uint64_t e, uint64_t phi);
-    uint64_t mulMod(uint64_t a, uint64_t b, uint64_t n);
+    // enum for results for some operations
+    enum
+    {
+        FAILURE = 0,
+        SUCCESS = 1
+    };
+    // Basic APIs:Modular arithmetic and so on
+    uint64_t
+    mulMod(uint64_t a, uint64_t b, uint64_t n);
     uint64_t powMod(uint64_t base, uint64_t pow, uint64_t n);
+    uint64_t EulerTotientFunction(uint64_t n);
     // Prime test algorithms
     bool MillerRabin(uint64_t n);
     /* Continuing to implement Fermat and Euclidan for Prime Test */
     bool primeTest(uint64_t n, int approach, int rounds);
     // Generate random prime number
-    void generateRamdomPrime(uint64_t &p, uint64_t &q);
+    uint64_t generateRamdomPrime(char bits, int rounds);
     // Greatest common divisor
-    uint64_t gcd(uint64_t a, uint64_t b);
-
+    uint64_t gcd(uint64_t &p, uint64_t &q);
+    int generatePublicKey(uint64_t n, int rounds);
+    int generatePrivateKey(uint64_t n);
+    void generateKeyPair(uint64_t n);
     /**
      * Prime number p & q
      * n = p * q
