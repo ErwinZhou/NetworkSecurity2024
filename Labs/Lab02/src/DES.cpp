@@ -35,13 +35,32 @@ INT32 DESUtils::permutationKey(uint64_t *key, int mode)
     *key = outputKey;
     return SUCCESS;
 }
-
-INT32 DESUtils::genKey(uint64_t *key)
+void DESUtils::generateRandomRootKey()
+{
+    /**
+     * @brief Generate a random root key for DES
+     *        The root key is a 64-bit random number
+     */
+    random_device rd;
+    mt19937_64 gen(rd());
+    uniform_int_distribution<uint64_t> dis(0, 0xFFFFFFFFFFFFFFFF);
+    rootKey = dis(gen);
+    return;
+}
+uint64_t DESUtils::getRootKey()
+{
+    /**
+     * @brief Get the root key for DES
+     * @return: the root key
+     */
+    return rootKey;
+}
+INT32 DESUtils::genKey(uint64_t key)
 {
     /**
      * @brief Generate 16 subkeys for DES
      */
-    uint64_t tempKey = *key;
+    uint64_t tempKey = key;
     // First step: Permutate the key using PC1 from 64bits to 56bits
     permutationKey(&tempKey, 1);
     // Second step: Generate 16 subkeys

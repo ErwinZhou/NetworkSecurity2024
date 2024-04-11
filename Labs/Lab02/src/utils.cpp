@@ -99,12 +99,13 @@ void PhantomHook(int role, Agent agent)
 {
     /**
      * Secret Code Name:Phantom Hook
-     * This is a bait to lure the enemy in and then we can take them down
-     * We will use this as a trap to catch the enemy by communicating without any encryption
-     * role: AGENT for agent, M16 for headquarter
+     * @brief This is a bait to lure the enemy in and then we can take them down
+     *        We will use this as a trap to catch the enemy by communicating without any encryption
+     *        role: AGENT for agent, M16 for headquarter
      * @param role: AGENT for agent, M16 for headquarter
      * @param socket: socket
      * @return void
+     * @version 1.0
      */
     int socket = agent.getAgentSocket();
     string codeName = agent.getAgentCodeName();
@@ -364,17 +365,23 @@ void PhantomHook(int role, Agent agent)
         }
     }
 }
-void SilentGuardian(int role, Agent agent, DESUtils des)
+void SilentGuardian(int role, Agent agent, DESUtils des, RSAUtils rsa)
 {
     /**
      * Secret Code Name:Silent Guardian
-     * This is a secret communicating channel for the headquarter and the agent
-     * In case there is enemy's interception, this will be activated to ensure the safety of the communication
-     * The communication is based on the DES algorithm
+     * @brief This is a secret communicating channel for the headquarter and the agent
+     *        In case there is enemy's interception, this will be activated to ensure the safety of the communication
+     *        The communication is based on the DES algorithm
+     * @note Implementation of the RSA algorithm is now available for the transmission of the DES key
+     *       There is no need to worry about the interception of the DES key
+     *       So now the DES key is randomly generated instead of written hard-coded
+     *       and then transmitted using the RSA algorithm.
      * @param role: AGENT for agent, M16 for headquarter
      * @param agent: Agent class object storing the essential information
      * @param des: DESUtils class object used for encryption and decryption
+     * @param rsa: RSAUtils class object used for transmitting the DES key
      * @return void
+     * @version 2.0
      */
     int socket = agent.getAgentSocket();
     string codeName = agent.getAgentCodeName();
@@ -383,8 +390,34 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
         // This part is in the agent's side
         string str_time = timeNow();
         bool control_flag = false;
-        cout << "<SecretHideout::System @ " + str_time + " # Message>:All channels have been compromised!" << endl;
-        cout << "<SecretHideout::System @ " + str_time + " # Message>:Silent Guardian is activated.." << endl;
+
+        // First, the agent will use the public RSA key to encrypt the DES key
+        // Then send the encrypted DES key to the headquarter
+        cout << "-----Generating DES Key-----" << endl;
+        des.generateRandomRootKey();
+        // Due to the hard-coded written of the Default DES key, we discard the hard-coded key for now
+        des.genKey(des.getRootKey());
+        cout << "<SecretHideout::System @ " + str_time + " # Message>:DES Key Generated." << endl;
+        cout << "-----RSA encrypting the DES Key-----" << endl;
+        // Encrypt the DES key using the RSA public key
+        uint64_t encryptedKey = 0;
+        // In order not to be noticed by the enemy, we use this random name to hide the DES key
+        uint64_t sdjsadixcxzdssf = des.getRootKey();
+        // Print the DES key
+        cout << "<SecretHideout::System @ " + str_time + " # Message>:DES Key: " + to_string(sdjsadixcxzdssf) << endl;
+        rsa.encrypt(sdjsadixcxzdssf, encryptedKey);
+        // Print the encrypted DES key
+        cout << "<SecretHideout::System @ " + str_time + " # Message>:Encrypted DES Key: " + to_string(encryptedKey) << endl;
+        if (send(socket, &encryptedKey, sizeof(encryptedKey), 0) != sizeof(encryptedKey))
+        {
+            cout << "<SecretHideout::System @ " + str_time + " # Message>:There is a problem with the communication..." << endl;
+            cout << "-----Shutdown Communication-----" << endl;
+            return;
+        }
+        else
+            cout << "<SecretHideout::System @ " + str_time + " # Message>:Successfully sent the DES Key!" << endl;
+
+        cout << "-----Everything Ready-----" << endl;
         pid_t nPid;
         nPid = fork();
         if (nPid != 0)
@@ -535,11 +568,71 @@ void SilentGuardian(int role, Agent agent, DESUtils des)
         cout << "<Headquarter::System @ " + str_time + " # Message>:Silent Guardian is activated.." << endl;
         // Notify the agent to also activate the Silent Guardian
         send(socket, "Silent Guardian", 100, 0);
+
+        // Version 2.0: RSA algorithm is used to transmit the DES key
+        // Gererate the RSA utils
+        cout << "<SecretHideout::System @ " + timeNow() + " # Message>:RSA initializaing......" << endl;
+        int rounds;
+        bool defaulyRSAKey;
+        bool ifHighSecurity;
+        cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Please enter the number of maxium rounds for RSA:" << endl;
+        cin >> rounds;
+        cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Please enter the default RSA key or not(1 for yes, 0 for no):" << endl;
+        cin >> defaulyRSAKey;
+        cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Please enter the high security mode or not(1 for yes, 0 for no):" << endl;
+        cin >> ifHighSecurity;
+        rsa.init(rounds, defaulyRSAKey, ifHighSecurity);
+
+        // Send the RSA public key to the agent
+        pair<uint64_t, uint64_t> publicKey = rsa.getPublicKey();
+        // Send the public key to the agent in the format of "(e, n)"
+        string strPublicKey = "(" + to_string(publicKey.first) + ", " + to_string(publicKey.second) + ")";
+        send(socket, strPublicKey.c_str(), 100, 0);
+        // Print the public key
+        cout << "<Headquarter::System @ " + timeNow() + " # Message>:RSA Public Key: " + strPublicKey << endl;
+        if (send(socket, strPublicKey.c_str(), 100, 0) != 100)
+        {
+            cout << "<Headquarter::System @ " + timeNow() + " # Message>:There is a problem with the communication..." << endl;
+            cout << "-----Shutdown Communication-----" << endl;
+            return;
+        }
+        else
+            cout << "<Headquarter::System @ " + timeNow() + " # Message>:Successfully sent the RSA Key!" << endl;
+
+        // Wait for the agent to send the DES key back
+        char strSocketBuffer[255];
+        memset(strSocketBuffer, 0, sizeof(strSocketBuffer));
+        cout << "-----Waiting for the DES Key-----" << endl;
+        // Using the TotalRecv function to ensure all data is received
+        if (recv(socket, strSocketBuffer, 255, 0) < 0)
+        {
+            cout << "<Headquarter::System @ " + timeNow() + " # Message>:There is a problem with the communication..." << endl;
+            cout << "-----Shutdown Communication-----" << endl;
+            return;
+        }
+        else
+        {
+            cout << "<Headquarter::System @ " + timeNow() + " # Message>:Successfully received the DES Key!" << endl;
+            cout << "-----Decrypting the DES Key-----" << endl;
+            // Decrypt the DES key using the RSA private key
+            uint64_t encryptedKey;
+            memcpy(&encryptedKey, strSocketBuffer, sizeof(encryptedKey));
+            // Print the encrypted DES key
+            cout << "<Headquarter::System @ " + timeNow() + " # Message>:Encrypted DES Key: " + to_string(encryptedKey) << endl;
+            uint64_t decryptedKey;
+            rsa.decrypt(encryptedKey, decryptedKey);
+            // Print the decrypted DES key
+            cout << "<Headquarter::System @ " + timeNow() + " # Message>:Decrypted DES Key: " + to_string(decryptedKey) << endl;
+            cout << "-----Generating DES Key-----" << endl;
+            des.genKey(decryptedKey);
+            cout << "<Headquarter::System @ " + timeNow() + " # Message>:DES Key Generated." << endl;
+        }
+        cout << "-----Everything Ready-----" << endl;
+
         pid_t nPid;
         nPid = fork();
         if (nPid != 0)
         {
-
             /**
              * Parent process
              * In charge of the following:

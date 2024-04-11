@@ -43,6 +43,7 @@ uint64_t RSAUtils::powMod(uint64_t base, uint64_t pow, uint64_t n)
         base = mulMod(base, base, n);
         pow >>= 1;
     }
+    return res;
 }
 uint64_t RSAUtils::EulerTotientFunction(uint64_t n)
 {
@@ -61,15 +62,6 @@ uint64_t RSAUtils::EulerTotientFunction(uint64_t n)
     return phi;
 }
 
-// int EulerTotientFunction(int n) {//计算欧拉函数，用来辅助求解最小原根
-//	int CoPrimeCount = 0;
-//	for (int i = 1; i < n; i++) {//判断从1-n-1中与n互素的数，其个数即为n的缩系大小
-//		if (if_Coprime(i, n)) {
-//			CoPrimeCount++;
-//		}
-//	}
-//	return CoPrimeCount;
-// }
 bool RSAUtils::MillerRabin(uint64_t n)
 {
     /**
@@ -106,7 +98,7 @@ bool RSAUtils::MillerRabin(uint64_t n)
     }
     return false;
 }
-bool RSAUtils::primeTest(uint64_t n, int approach, int rounds = 100)
+bool RSAUtils::primeTest(uint64_t n, int approach, int rounds)
 {
     /**
      * Test whether n is a prime number using different approaches.
@@ -141,15 +133,19 @@ bool RSAUtils::primeTest(uint64_t n, int approach, int rounds = 100)
         break;
     case EUCLIDEAN:
         // continue to implement
+        return true;
         break;
     case FERMAT:
         // continue to implement
+        return true;
         break;
     default:
+        return false;
         break;
     }
+    return false;
 }
-uint64_t RSAUtils::generateRamdomPrime(char bits, int rounds = 100)
+uint64_t RSAUtils::generateRamdomPrime(int bits, int rounds)
 {
     /**
      * Generate a random prime number with the specified bits.
@@ -193,7 +189,7 @@ uint64_t RSAUtils::gcd(uint64_t &p, uint64_t &q)
     }
     return a;
 }
-int RSAUtils::generatePublicKey(uint64_t n, int rounds = 100)
+int RSAUtils::generatePublicKey(uint64_t n, int rounds)
 {
     /**
      * Generate public key paramter (e, n) for RSA encryption.
@@ -203,7 +199,6 @@ int RSAUtils::generatePublicKey(uint64_t n, int rounds = 100)
      */
     random_device rd;
     mt19937_64 gen(rd());
-    uint64_t phi_n = EulerTotientFunction(n);
     uniform_int_distribution<uint64_t> dis(2, phi_n - 1);
     do
     {
@@ -217,6 +212,16 @@ int RSAUtils::generatePublicKey(uint64_t n, int rounds = 100)
     publicKey.second = n;
     return SUCCESS;
 }
+pair<uint64_t, uint64_t> RSAUtils::getPublicKey()
+{
+    return publicKey;
+}
+void RSAUtils::setPublicKey(uint64_t e, uint64_t n)
+{
+    publicKey.first = e;
+    publicKey.second = n;
+    return;
+}
 int RSAUtils::generatePrivateKey(uint64_t n)
 {
     /**
@@ -224,7 +229,6 @@ int RSAUtils::generatePrivateKey(uint64_t n)
      * @param n: number
      * @return SUCCESS or FAILURE
      */
-    uint64_t phi_n = EulerTotientFunction(n);
     uint64_t MAX = 0xffffffffffffffff - phi_n;
     uint64_t i = 1;
     while (true)
@@ -240,12 +244,117 @@ int RSAUtils::generatePrivateKey(uint64_t n)
     privateKey.second = n;
     return SUCCESS;
 }
-void RSAUtils::generateKeyPair(uint64_t n)
+pair<uint64_t, uint64_t> RSAUtils::getPrivateKey()
+{
+    return privateKey;
+}
+void RSAUtils::setPrivateKey(uint64_t d, uint64_t n)
+{
+    privateKey.first = d;
+    privateKey.second = n;
+    return;
+}
+int RSAUtils::generateKeyPair(uint64_t n, int rounds)
 {
     /**
-     * Generate RSA key pair.
+     * Generate RSA key pair both for encryption and decryption.
      * @param n: number
      */
-    generatePublicKey(n);
-    generatePrivateKey(n);
+    // Generate public key first, so the private key can be generated based on the public key.
+    if (generatePublicKey(n, rounds) == FAILURE)
+        return FAILURE;
+    if (generatePrivateKey(n) == FAILURE)
+        return FAILURE;
+    return SUCCESS;
+}
+void RSAUtils::encrypt(uint64_t &plaintext, uint64_t &ciphertext)
+{
+    /**
+     * Encrypt the plaintext using RSA encryption algorithm.
+     * According to the RSA encryption algorithm:
+     * C = M^e (mod n) using the public key (e, n)
+     * @param plaintext: plaintext
+     * @param ciphertext: ciphertext
+     */
+    ciphertext = powMod(plaintext, e, n);
+    return;
+}
+void RSAUtils::decrypt(uint64_t &plaintext, uint64_t &ciphertext)
+{
+    /**
+     * Decrypt the ciphertext using RSA decryption algorithm.
+     * According to the RSA decryption algorithm:
+     * M = C^d (mod n) using the private key (d, n)
+     * @param plaintext: plaintext
+     * @param ciphertext: ciphertext
+     */
+    plaintext = powMod(ciphertext, d, n);
+    return;
+}
+int RSAUtils::init(int rounds, bool defaultKey, bool highSecurity)
+{
+    /**
+     * @brief Initialize the RSAUtils
+     * @details We need to follow the steps below:
+     * 1. Generate two random prime numbers p and q
+     * 2. Calculate n = p * q
+     * 3. Calculate phi = (p - 1) * (q - 1)
+     * 4. Generate public key (e, n)
+     * 5. Generate private key (d, n)
+     * @note If there is a need to enhance the security, we need to follow some standards:
+     * 1. The length of p and q should be the nearly the same
+     * 2. Large prime factors for (p-1) and (q-1)
+     * 3. Small Greatest Common Divisor(GCD) for (p-1) and (q-1)
+     * 4. Size of d when e<n and d>n^0.25
+     * 5. Defending against Timing Attacks by
+     *   - Implementing constant-time algorithms for operations such as modular exponentiation, ensuring that execution time does not depend on the values of the inputs.
+     *   - Introducing random delays in the algorithm to obscure the execution time.
+     *   - Randomizing operations, such as multiplying the plaintext by a random number before encryption, to make the timing analysis more challenging.
+     * @param rounds: test rounds
+     * @param defaultKey: whether to use the default key as e=65537(2^16+1).
+     *                    It not only provides a good balance between security(low Hamming weight) and efficiency(computationlly efficient)
+     *                    but also is widely used in practice.
+     * @param highSecurity: whether to use the high security standard
+     * @return SUCCESS or FAILURE
+     */
+    if (highSecurity)
+    {
+        // Advanced Standard for better security
+        // Continuing to implement......
+        if (defaultKey)
+            e = 65537;
+    }
+    else
+    {
+        // Basic Standard with high efficiency
+        // First, generate two random prime numbers p and q
+        do
+        {
+            p = generateRamdomPrime(32, rounds);
+            q = generateRamdomPrime(32, rounds);
+            // In order to avoid overflow, we need to make sure p * q <= 2^64
+            // At the same time, to make both of them as large as possible
+        } while ((rounds--) && (p * q > 0xffffffffffffffff));
+        n = p * q;
+        phi_n = (p - 1) * (q - 1);
+        // Generate RSA key pair
+        if (defaultKey)
+        {
+            // Use the default key as e=65537(2^16+1)
+            e = 65537;
+            // Assign the public key
+            publicKey.first = e;
+            publicKey.second = n;
+            // Generate private key based on the public key
+            if (generatePrivateKey(n) == FAILURE)
+                return FAILURE;
+        }
+        else
+        {
+            // Generate RSA key pair
+            if (generateKeyPair(n) == FAILURE)
+                return FAILURE;
+        }
+    }
+    return SUCCESS;
 }

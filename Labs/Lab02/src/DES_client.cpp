@@ -5,12 +5,12 @@ int main()
 
     // Initializations
     numKey = 0;
-    for (int i = 0; i < 8; ++i)
-    {
-        numKey <<= 8;
-        numKey |= static_cast<unsigned char>(key[i]);
-    }
-    des.genKey(&numKey);
+    // for (int i = 0; i < 8; ++i)
+    // {
+    //     numKey <<= 8;
+    //     numKey |= static_cast<unsigned char>(defaultKey[i]);
+    // }
+    // des.genKey(numKey);
     memset(decryptedtext, 0, 64);
     // Easter Egg Part
     cout << "-----------Secret Hideout-----------" << endl;
@@ -111,7 +111,7 @@ int main()
     }
     // Set the address of the server
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(SERVER_PORT);
+    serverAddr.sin_port = htons(SERVER_PORT + 2);
     serverAddr.sin_addr.s_addr = inet_addr(serverIP.c_str());
 
     // Connect to the server
@@ -150,9 +150,31 @@ int main()
             }
             else if (strcmp(strSocketBuffer, "Silent Guardian") == 0)
             {
+                memset(strSocketBuffer, 0, BUFFERSIZE);
                 // Activate the Silent Guardian
                 Agent agent(agentName, agentCodeName, agentSocket);
-                SilentGuardian(AGENT, agent, des);
+                cout << "<SecretHideout::System @ " + timeNow() + " # Message>:All channels have been compromised!" << endl;
+                cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Silent Guardian is activated.." << endl;
+                cout << "-----Waiting for RSA Key-----" << endl;
+
+                if (recv(agentSocket, strSocketBuffer, BUFFERSIZE, 0) < 0)
+                {
+                    cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Error in receiving RSA Public Key!" << endl;
+                    cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Please report this issue to the headquarter immediately!" << endl;
+                    close(agentSocket);
+                    return 0;
+                }
+                else
+                    cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Successfully received the RSA Public Key!" << endl;
+                // The RSA Public Key should be in the format of "(e, n)"
+                // Extract the RSA Public Key
+                uint64_t e, n;
+                sscanf(strSocketBuffer, "(%lu, %lu)", &e, &n);
+                // Print the RSA Public Key
+                cout << "<SecretHideout::System @ " + timeNow() + " # Message>:RSA Public Key: (" << e << ", " << n << ")" << endl;
+                rsa.setPublicKey(e, n);
+                // Activate the Silent Guardian
+                SilentGuardian(AGENT, agent, des, rsa);
                 close(agentSocket);
                 return 0;
             }

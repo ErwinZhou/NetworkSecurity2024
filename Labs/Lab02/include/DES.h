@@ -5,9 +5,15 @@ typedef int INT32;
 #include <iostream>
 #include <vector>
 #include <assert.h>
+#include <random>
 using namespace std;
+#ifndef SUCCESS
 #define SUCCESS 1
+#endif
+
+#ifndef FAILURE
 #define FAILURE 0
+#endif
 class DESUtils
 {
 public:
@@ -91,6 +97,8 @@ public:
                              41, 52, 31, 37, 47, 55, 30, 40,
                              51, 45, 33, 48, 44, 49, 39, 56,
                              34, 53, 46, 42, 50, 36, 29, 32};
+    // Root Key for DES
+    uint64_t rootKey;
     // 56 bits × 16 stored in 16 Rounds
     uint64_t roundKeys[16];
 
@@ -115,7 +123,9 @@ public:
     ~DESUtils(){};
     // Encrypt the plaintext
     void encrypt(const char *plaintext, char *ciphertext);
+    void generateRandomRootKey();
+    uint64_t getRootKey();
+    INT32 genKey(uint64_t key);
     // Decrypt the ciphertext
-    INT32 genKey(uint64_t *key);
     void decrypt(const char *ciphertext, char *plaintext);
 };

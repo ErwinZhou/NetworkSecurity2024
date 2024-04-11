@@ -10,7 +10,7 @@
 #include <unistd.h>     // Provides general system call functions
 #include <netdb.h>      // Provides domain name resolution functions
 #include <sys/wait.h>   // Provides waitpid() function
-#include "utils.h"      // utils.h is already includes DES.h and agent.h
+#include "utils.h"      // utils.h is already includes RSA.h, DES.h and agent.h
 using namespace std;
 /**
  * In case the M16 headquarter is under a DDoS attack
@@ -25,9 +25,13 @@ string agentPasswords[] = {"007", "Jason Bourne", "Black Widow", "Ethan Hunt", "
 
 /* DES parameters */
 DESUtils des;
-char *key = "YCZhouNB"; // Hardcoded key
-uint64_t numKey;        // Key in hexadecimal
+// Hadcoded DES key for default, discard for now due to unsafety
+char *defaultKey = "YCZhouNB";
+uint64_t numKey; // Key in hexadecimal
 char cipheredtext[64];
+
+/* RSA parameters */
+RSAUtils rsa;
 
 /* Socket parameters */
 string commanderName;
