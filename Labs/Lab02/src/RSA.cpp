@@ -56,12 +56,54 @@ uint64_t RSAUtils::EulerTotientFunction(uint64_t n)
     // 1~(n-1) are coprime with n
     for (uint64_t i = 2; i < n; i++)
     {
-        if (gcd(i, n) == 1)
+        int64_t x, y;
+        if (extendedGCD(i, n, x, y) == 1)
             phi++;
     }
     return phi;
 }
-
+uint64_t RSAUtils::extendedGCD(uint64_t a, uint64_t b, int64_t &x, int64_t &y)
+{
+    /**
+     * Calculate the greatest common divisor of a and b using Extended Euclidean Algorithm.
+     * @param a: var1
+     * @param b: var2
+     * @param x: a^-1(mod b)
+     * @param y: b^-1(mod a)
+     * @return gcd: greatest common divisor of a and b
+     */
+    if (b == 0)
+    {
+        x = 1;
+        y = 0;
+        return a;
+    }
+    uint64_t gcd = extendedGCD(b, a % b, x, y);
+    int64_t temp = x;
+    x = y;
+    y = temp - static_cast<int64_t>(a / b) * y;
+    return gcd;
+}
+uint64_t RSAUtils::modInverse(uint64_t a, uint64_t n)
+{
+    /**
+     * Calculate the modular multiplicative inverse of a mod n.
+     * @param a: var1
+     * @param n: mod
+     * @return modular multiplicative inverse of a mod n---a^-1(mod n)
+     */
+    int64_t x, y;
+    uint64_t gcd = extendedGCD(a, n, x, y);
+    // ax+ny=gcd(a,n)
+    // x = a^-1(mod n)
+    // y = n^-1(mod a)
+    if (gcd != 1)
+        // a and n are not coprime, so the modular multiplicative inverse does not exist.
+        return 0;
+    else
+        // To make it a positive number
+        return (x + n) % n;
+}
 bool RSAUtils::MillerRabin(uint64_t n)
 {
     /**
@@ -166,29 +208,7 @@ uint64_t RSAUtils::generateRamdomPrime(int bits, int rounds)
     } while (!primeTest(base, MILLER_RABIN, rounds));
     return base;
 }
-uint64_t RSAUtils::gcd(uint64_t &p, uint64_t &q)
-{
-    /**
-     * Calculate the greatest common divisor of a and b using Euclidean Algorithm.
-     * @param p: var1
-     * @param q: var2
-     * @return a: greatest common divisor
-     */
-    uint64_t a = p > q ? p : q;
-    uint64_t b = p < q ? p : q;
-    uint64_t t;
-    if (p == q)
-        // If the two numbers are equal, the greatest common divisor is the number itself.
-        return p;
-    while (b)
-    {
-        // gcd(a, b)=gcd(b, a-qb)
-        t = a % b;
-        a = b;
-        b = t;
-    }
-    return a;
-}
+
 int RSAUtils::generatePublicKey(uint64_t n, int rounds)
 {
     /**
@@ -200,11 +220,12 @@ int RSAUtils::generatePublicKey(uint64_t n, int rounds)
     random_device rd;
     mt19937_64 gen(rd());
     uniform_int_distribution<uint64_t> dis(2, phi_n - 1);
+    int64_t x, y;
     do
     {
         e = dis(gen);
         rounds--;
-    } while ((gcd(e, phi_n) != 1) && (rounds > 0));
+    } while ((extendedGCD(e, phi_n, x, y) != 1) && (rounds > 0));
     if (rounds == 0)
         return FAILURE;
     // Assign the public key
@@ -218,28 +239,24 @@ pair<uint64_t, uint64_t> RSAUtils::getPublicKey()
 }
 void RSAUtils::setPublicKey(uint64_t e, uint64_t n)
 {
+    this->e = e;
     publicKey.first = e;
+    this->n = n;
     publicKey.second = n;
     return;
 }
 int RSAUtils::generatePrivateKey(uint64_t n)
 {
     /**
-     * Generate private key paramter d for RSA decryption.
+     * Generate private key paramter (d, n) for RSA decryption.
      * @param n: number
      * @return SUCCESS or FAILURE
      */
-    uint64_t MAX = 0xffffffffffffffff - phi_n;
-    uint64_t i = 1;
-    while (true)
+    d = modInverse(e, phi_n);
+    if (d == 0)
     {
-        if (((i * phi_n) + 1) % e == 0)
-            d = ((i * phi_n) + 1) % e;
-        i++;
-        if ((i + 1) * phi_n > MAX)
-            return FAILURE;
+        return FAILURE; // If d = 0, resprsenting the case where no inverse exists
     }
-    // Assign the private key
     privateKey.first = d;
     privateKey.second = n;
     return SUCCESS;
@@ -250,7 +267,9 @@ pair<uint64_t, uint64_t> RSAUtils::getPrivateKey()
 }
 void RSAUtils::setPrivateKey(uint64_t d, uint64_t n)
 {
+    this->d = d;
     privateKey.first = d;
+    this->n = n;
     privateKey.second = n;
     return;
 }
@@ -288,6 +307,12 @@ void RSAUtils::decrypt(uint64_t &plaintext, uint64_t &ciphertext)
      * @param plaintext: plaintext
      * @param ciphertext: ciphertext
      */
+    cout << "p:" << p << endl;
+    cout << "q:" << q << endl;
+    cout << "phi_n:" << phi_n << endl;
+    cout << "e: " << e << endl;
+    cout << "d: " << d << endl;
+    cout << "n: " << n << endl;
     plaintext = powMod(ciphertext, d, n);
     return;
 }
@@ -343,6 +368,7 @@ int RSAUtils::init(int rounds, bool defaultKey, bool highSecurity)
             // Use the default key as e=65537(2^16+1)
             e = 65537;
             // Assign the public key
+            this->e = e;
             publicKey.first = e;
             publicKey.second = n;
             // Generate private key based on the public key

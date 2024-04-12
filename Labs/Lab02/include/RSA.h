@@ -35,14 +35,15 @@ private:
     uint64_t mulMod(uint64_t a, uint64_t b, uint64_t n);
     uint64_t powMod(uint64_t base, uint64_t pow, uint64_t n);
     uint64_t EulerTotientFunction(uint64_t n);
+    // Greatest common divisor using Extended Euclidean Algorithmn
+    uint64_t extendedGCD(uint64_t a, uint64_t b, int64_t &x, int64_t &y);
+    uint64_t modInverse(uint64_t a, uint64_t n);
     // Prime test algorithms
     bool MillerRabin(uint64_t n);
     /* Continuing to implement Fermat and Euclidan for Prime Test */
     bool primeTest(uint64_t n, int approach, int rounds = 100);
     // Generate random prime number
     uint64_t generateRamdomPrime(int bits, int rounds = 100);
-    // Greatest common divisor
-    uint64_t gcd(uint64_t &p, uint64_t &q);
     int generatePublicKey(uint64_t n, int rounds = 100);
     int generatePrivateKey(uint64_t n);
     int generateKeyPair(uint64_t n, int rounds = 100);

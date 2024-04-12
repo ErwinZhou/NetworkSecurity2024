@@ -27,7 +27,6 @@ string agentPasswords[] = {"007", "Jason Bourne", "Black Widow", "Ethan Hunt", "
 DESUtils des;
 // Hadcoded DES key for default, discard for now due to unsafety
 char *defaultKey = "YCZhouNB";
-uint64_t numKey; // Key in hexadecimal
 char cipheredtext[64];
 
 /* RSA parameters */

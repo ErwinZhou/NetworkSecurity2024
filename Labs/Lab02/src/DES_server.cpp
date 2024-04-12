@@ -55,13 +55,6 @@ int main()
     signal(SIGINT, handle_sigint);
     timeout.tv_sec = 300; // After 300 seconds, the socket will be closed automatically
     timeout.tv_usec = 0;
-    numKey = 0;
-    // for (int i = 0; i < 8; ++i)
-    // {
-    //     numKey <<= 8;
-    //     numKey |= static_cast<unsigned char>(defaultKey[i]);
-    // }
-    // des.genKey(numKey);
     memset(cipheredtext, 0, 64);
     memset(agentCodeName, 0, 64);
     // Agent's confidential information
@@ -112,7 +105,7 @@ REBOOT:
     // Bind the socket to the address
     cout << "-----Binding Socket-----" << endl;
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(SERVER_PORT + 2);
+    serverAddr.sin_port = htons(SERVER_PORT + 1);
     serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     if (bind(sListenSocket, (sockaddr *)&serverAddr, sizeof(struct sockaddr)) < 0)
     {

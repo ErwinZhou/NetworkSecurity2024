@@ -418,6 +418,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des, RSAUtils rsa)
             cout << "<SecretHideout::System @ " + str_time + " # Message>:Successfully sent the DES Key!" << endl;
 
         cout << "-----Everything Ready-----" << endl;
+        cout << "-----Communication Start-----" << endl;
         pid_t nPid;
         nPid = fork();
         if (nPid != 0)
@@ -453,6 +454,8 @@ void SilentGuardian(int role, Agent agent, DESUtils des, RSAUtils rsa)
                         // Fix the problem of the sudden message at the same line of "Please Enter:"
                         cout << endl;
                         string str_time = timeNow();
+                        // if (control_flag)
+                        //     cout << "<SecretHideout::Headquarter @ " + str_time + " # Message>: " + decryptedtext << endl;
                         cout << "<SecretHideout::Headquarter @ " + str_time + " # Message>: " + decryptedtext << endl;
                         if (memcmp("OVER", decryptedtext, 4) == 0)
                         {
@@ -476,6 +479,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des, RSAUtils rsa)
                             return;
                         }
                     }
+                    control_flag = true;
                 }
                 else
                 {
@@ -568,20 +572,28 @@ void SilentGuardian(int role, Agent agent, DESUtils des, RSAUtils rsa)
         cout << "<Headquarter::System @ " + str_time + " # Message>:Silent Guardian is activated.." << endl;
         // Notify the agent to also activate the Silent Guardian
         send(socket, "Silent Guardian", 100, 0);
-
-        // Version 2.0: RSA algorithm is used to transmit the DES key
-        // Gererate the RSA utils
-        cout << "<SecretHideout::System @ " + timeNow() + " # Message>:RSA initializaing......" << endl;
-        int rounds;
-        bool defaulyRSAKey;
-        bool ifHighSecurity;
-        cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Please enter the number of maxium rounds for RSA:" << endl;
-        cin >> rounds;
-        cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Please enter the default RSA key or not(1 for yes, 0 for no):" << endl;
-        cin >> defaulyRSAKey;
-        cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Please enter the high security mode or not(1 for yes, 0 for no):" << endl;
-        cin >> ifHighSecurity;
-        rsa.init(rounds, defaulyRSAKey, ifHighSecurity);
+        while (true)
+        {
+            // Version 2.0: RSA algorithm is used to transmit the DES key
+            // Gererate the RSA utils
+            cout << "<SecretHideout::System @ " + timeNow() + " # Message>:RSA initializaing......" << endl;
+            int rounds;
+            bool defaulyRSAKey;
+            bool ifHighSecurity;
+            cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Please enter the number of maxium rounds for RSA:" << endl;
+            cin >> rounds;
+            cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Please enter the default RSA key or not(1 for yes, 0 for no):" << endl;
+            cin >> defaulyRSAKey;
+            cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Please enter the high security mode or not(1 for yes, 0 for no):" << endl;
+            cin >> ifHighSecurity;
+            if (rsa.init(rounds, defaulyRSAKey, ifHighSecurity) == FAILURE)
+            {
+                cout << "<Headquarter::System @ " + timeNow() + " # Message>:Oops!RSA Initialization failed!" << endl;
+                cout << "<Headquarter::System @ " + timeNow() + " # Message>:It is probably due to the the related settings.Please try again." << endl;
+                continue;
+            }
+            break;
+        }
 
         // Send the RSA public key to the agent
         pair<uint64_t, uint64_t> publicKey = rsa.getPublicKey();
@@ -615,12 +627,12 @@ void SilentGuardian(int role, Agent agent, DESUtils des, RSAUtils rsa)
             cout << "<Headquarter::System @ " + timeNow() + " # Message>:Successfully received the DES Key!" << endl;
             cout << "-----Decrypting the DES Key-----" << endl;
             // Decrypt the DES key using the RSA private key
-            uint64_t encryptedKey;
+            uint64_t encryptedKey = 0;
             memcpy(&encryptedKey, strSocketBuffer, sizeof(encryptedKey));
             // Print the encrypted DES key
             cout << "<Headquarter::System @ " + timeNow() + " # Message>:Encrypted DES Key: " + to_string(encryptedKey) << endl;
-            uint64_t decryptedKey;
-            rsa.decrypt(encryptedKey, decryptedKey);
+            uint64_t decryptedKey = 0;
+            rsa.decrypt(decryptedKey, encryptedKey);
             // Print the decrypted DES key
             cout << "<Headquarter::System @ " + timeNow() + " # Message>:Decrypted DES Key: " + to_string(decryptedKey) << endl;
             cout << "-----Generating DES Key-----" << endl;
@@ -628,6 +640,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des, RSAUtils rsa)
             cout << "<Headquarter::System @ " + timeNow() + " # Message>:DES Key Generated." << endl;
         }
         cout << "-----Everything Ready-----" << endl;
+        cout << "-----Communication Start-----" << endl;
 
         pid_t nPid;
         nPid = fork();

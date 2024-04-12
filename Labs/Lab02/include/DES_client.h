@@ -16,7 +16,6 @@ using namespace std;
 DESUtils des;
 // Hadcoded DES key for default, discard for now due to unsafety
 char *defaultKey = "YCZhouNB";
-uint64_t numKey;
 char decryptedtext[64];
 
 /* RSA parameters */

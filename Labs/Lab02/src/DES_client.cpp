@@ -4,13 +4,6 @@ int main()
 {
 
     // Initializations
-    numKey = 0;
-    // for (int i = 0; i < 8; ++i)
-    // {
-    //     numKey <<= 8;
-    //     numKey |= static_cast<unsigned char>(defaultKey[i]);
-    // }
-    // des.genKey(numKey);
     memset(decryptedtext, 0, 64);
     // Easter Egg Part
     cout << "-----------Secret Hideout-----------" << endl;
@@ -111,7 +104,7 @@ int main()
     }
     // Set the address of the server
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(SERVER_PORT + 2);
+    serverAddr.sin_port = htons(SERVER_PORT + 1);
     serverAddr.sin_addr.s_addr = inet_addr(serverIP.c_str());
 
     // Connect to the server

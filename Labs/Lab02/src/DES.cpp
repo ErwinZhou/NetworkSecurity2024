@@ -43,8 +43,11 @@ void DESUtils::generateRandomRootKey()
      */
     random_device rd;
     mt19937_64 gen(rd());
-    uniform_int_distribution<uint64_t> dis(0, 0xFFFFFFFFFFFFFFFF);
-    rootKey = dis(gen);
+    uniform_int_distribution<uint64_t> dis(0, 0xffffffffffffffff);
+    do
+    {
+        rootKey = dis(gen);
+    } while (std::to_string(rootKey)[0] == '1');
     return;
 }
 uint64_t DESUtils::getRootKey()
