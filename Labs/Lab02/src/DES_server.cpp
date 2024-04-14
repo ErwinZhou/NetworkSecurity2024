@@ -9,6 +9,7 @@ void handle_sigint(int sig)
      * @return void
      */
     close(sListenSocket);
+    close(sAcceptSocket);
     exit(0);
 }
 void emergencyResponse()
@@ -105,7 +106,7 @@ REBOOT:
     // Bind the socket to the address
     cout << "-----Binding Socket-----" << endl;
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(SERVER_PORT + 1);
+    serverAddr.sin_port = htons(SERVER_PORT);
     serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     if (bind(sListenSocket, (sockaddr *)&serverAddr, sizeof(struct sockaddr)) < 0)
     {
@@ -197,6 +198,7 @@ REBOOT:
                         // ENCRYPT THE MESSAGE so that the enemy cannot be aware of the situation
                         des.encrypt("FAKE IDENTITY", cipheredtext);
                         send(sAcceptSocket, cipheredtext, 100, 0);
+                        close(sListenSocket);
                         close(sAcceptSocket);
                         exit(0);
                     }
@@ -240,8 +242,9 @@ REBOOT:
                      * This is a secret communicating channel for the headquarter and the agent
                      * In case there is enemy's interception, this will be activated to ensure the safety of the communication
                      */
-
                     SilentGuardian(M16, agent, des, rsa);
+                    // SilentGuardian_AIO(M16, agent, des, rsa);
+                    close(sListenSocket);
                     close(sAcceptSocket);
                     exit(0);
                     return 0;
@@ -256,6 +259,7 @@ REBOOT:
                      * This is a risky move, but it could be a potential strategy
                      */
                     PhantomHook(M16, agent);
+                    close(sListenSocket);
                     close(sAcceptSocket);
                     exit(0);
                     return 0;
@@ -270,6 +274,7 @@ REBOOT:
 
                     des.encrypt("SYSTEM DOWN", cipheredtext);
                     send(sAcceptSocket, cipheredtext, 255, 0);
+                    close(sListenSocket);
                     close(sAcceptSocket);
                     exit(0);
                     break;

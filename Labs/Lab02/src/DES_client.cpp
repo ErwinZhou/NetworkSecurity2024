@@ -104,7 +104,7 @@ int main()
     }
     // Set the address of the server
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(SERVER_PORT + 1);
+    serverAddr.sin_port = htons(SERVER_PORT);
     serverAddr.sin_addr.s_addr = inet_addr(serverIP.c_str());
 
     // Connect to the server
@@ -139,7 +139,7 @@ int main()
                 Agent agent(agentName, agentCodeName, agentSocket);
                 PhantomHook(AGENT, agent);
                 close(agentSocket);
-                return 0;
+                exit(0);
             }
             else if (strcmp(strSocketBuffer, "Silent Guardian") == 0)
             {
@@ -155,7 +155,7 @@ int main()
                     cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Error in receiving RSA Public Key!" << endl;
                     cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Please report this issue to the headquarter immediately!" << endl;
                     close(agentSocket);
-                    return 0;
+                    exit(0);
                 }
                 else
                     cout << "<SecretHideout::System @ " + timeNow() + " # Message>:Successfully received the RSA Public Key!" << endl;
@@ -168,8 +168,9 @@ int main()
                 rsa.setPublicKey(e, n);
                 // Activate the Silent Guardian
                 SilentGuardian(AGENT, agent, des, rsa);
+                // SilentGuardian_AIO(AGENT, agent, des, rsa);
                 close(agentSocket);
-                return 0;
+                exit(0);
             }
             else
             {
@@ -184,7 +185,7 @@ int main()
                          << endl;
                     cout << "[*%$$K#$%%SA]You are on your own now......" << endl;
                     close(agentSocket);
-                    return 0;
+                    exit(0);
                 }
                 else if (strcmp(decryptedtext, "FAKE IDENTITY") == 0)
                 {
@@ -199,7 +200,7 @@ int main()
                          << endl;
                     cout << "-----Connection Closed-----" << endl;
                     close(agentSocket);
-                    return 0;
+                    exit(0);
                 }
                 cout << "<SecretHideout::Headquarter @ " + str_time + " # Message> " << decryptedtext << endl;
                 memset(strSocketBuffer, 0, BUFFERSIZE);

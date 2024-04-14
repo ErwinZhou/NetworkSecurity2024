@@ -10,7 +10,10 @@
 #include "utils.h"      // utils.h is already includes RSA.h, DES.h and agent.h
 using namespace std;
 #define SERVER_PORT 8007
+#if !defined(BUFFERSIZE)
 #define BUFFERSIZE 1024
+
+#endif
 
 /* DES parameters */
 DESUtils des;

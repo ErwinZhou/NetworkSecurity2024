@@ -7,23 +7,27 @@ uint64_t RSAUtils::mulMod(uint64_t a, uint64_t b, uint64_t n)
      * By following:
      * (1) (a * b)(mod n) = ((a mod n) * (b mod n))(mod n)
      * (2) Multiplication--->Shifting and Adding
+     * (3) Avoiding overflow--->Use __uint128_t to store the result of multiplication
      * @param a: var1
      * @param b: var2
      * @param n: mod
      * @return res: (a * b)(mod n)
      */
-    uint64_t res = 0;
-    while (b > 0)
+    __uint128_t res = 0;
+    __uint128_t a_mod = a % n;
+    __uint128_t b_mod = b % n; // This line is not strictly necessary but shows how to use __uint128_t
+    __uint128_t n_mod = n;     // Use __uint128_t for modulus to avoid any casting issues in calculations
+
+    while (b_mod > 0)
     {
-        if (b & 1)
-            res = (res + a) % n;
-        if (a > n / 2)
-            a = (a << 1) % n;
-        else
-            a = a << 1;
-        b >>= 1;
+        if (b_mod & 1)
+        {
+            res = (res + a_mod) % n_mod;
+        }
+        a_mod = (2 * a_mod) % n_mod;
+        b_mod >>= 1;
     }
-    return res % n;
+    return (uint64_t)res; // Cast back to uint64_t to return the expected type
 }
 uint64_t RSAUtils::powMod(uint64_t base, uint64_t pow, uint64_t n)
 {
@@ -307,12 +311,6 @@ void RSAUtils::decrypt(uint64_t &plaintext, uint64_t &ciphertext)
      * @param plaintext: plaintext
      * @param ciphertext: ciphertext
      */
-    cout << "p:" << p << endl;
-    cout << "q:" << q << endl;
-    cout << "phi_n:" << phi_n << endl;
-    cout << "e: " << e << endl;
-    cout << "d: " << d << endl;
-    cout << "n: " << n << endl;
     plaintext = powMod(ciphertext, d, n);
     return;
 }
@@ -382,5 +380,6 @@ int RSAUtils::init(int rounds, bool defaultKey, bool highSecurity)
                 return FAILURE;
         }
     }
+
     return SUCCESS;
 }

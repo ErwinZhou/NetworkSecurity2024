@@ -48,6 +48,7 @@ void DESUtils::generateRandomRootKey()
     {
         rootKey = dis(gen);
     } while (std::to_string(rootKey)[0] == '1');
+
     return;
 }
 uint64_t DESUtils::getRootKey()

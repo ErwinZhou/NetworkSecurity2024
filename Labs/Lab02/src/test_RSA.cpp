@@ -6,15 +6,14 @@ int main(int argc, char **argv)
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
-TEST(RSAUtilsTests, ModInverseTest)
+TEST(RSAUtilsTests, Test1)
 {
     RSAUtils rsa;
-
-    // Test case 1: a = 1769, n = 550
-    uint64_t result = rsa.modInverse(1769, 550);
-    EXPECT_EQ(result, 379);
-
-    // Test case 2: a = 3413568960882452063, n = 8097058363760347660
-    result = rsa.modInverse(3413568960882452063, 8097058363760347660);
-    EXPECT_EQ(result, 2395369615547321587);
+    rsa.init();
+    uint64_t plaintext = 123456789;
+    uint64_t encryptedtext = 0;
+    uint64_t decryptedtext = 0;
+    rsa.encrypt(plaintext, encryptedtext);
+    rsa.decrypt(decryptedtext, encryptedtext);
+    EXPECT_EQ(plaintext, decryptedtext);
 }
