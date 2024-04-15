@@ -982,7 +982,7 @@ void SilentGuardian(int role, Agent agent, DESUtils des, RSAUtils rsa)
         string strPublicKey = "(" + to_string(publicKey.first) + ", " + to_string(publicKey.second) + ")";
         send(socket, strPublicKey.c_str(), 100, 0);
         // Print the public key
-        cout << "<Headquarter::System @ " + timeNow() + " # Message>:RSA Public Key: " + strPublicKey << endl;
+        // cout << "<Headquarter::System @ " + timeNow() + " # Message>:RSA Public Key: " + strPublicKey << endl;
         if (send(socket, strPublicKey.c_str(), 100, 0) != 100)
         {
             cout << "<Headquarter::System @ " + timeNow() + " # Message>:There is a problem with the communication...25" << endl;

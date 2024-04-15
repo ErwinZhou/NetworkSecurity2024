@@ -1,4 +1,4 @@
-#  TechnologiesOfNetworkSecurity 2024
+#  NetworkSecurity 2024
 ## Nankai University
 ###  College of Computer and Cyber Science Junior
 #### Associate Professor: Yu Zhang

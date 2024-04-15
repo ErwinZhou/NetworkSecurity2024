@@ -164,7 +164,7 @@ int main()
                 uint64_t e, n;
                 sscanf(strSocketBuffer, "(%lu, %lu)", &e, &n);
                 // Print the RSA Public Key
-                cout << "<SecretHideout::System @ " + timeNow() + " # Message>:RSA Public Key: (" << e << ", " << n << ")" << endl;
+                // cout << "<SecretHideout::System @ " + timeNow() + " # Message>:RSA Public Key: (" << e << ", " << n << ")" << endl;
                 rsa.setPublicKey(e, n);
                 // Activate the Silent Guardian
                 SilentGuardian(AGENT, agent, des, rsa);
