@@ -191,7 +191,7 @@ bool RSAUtils::primeTest(uint64_t n, int approach, int rounds)
     }
     return false;
 }
-uint64_t RSAUtils::generateRamdomPrime(int bits, int rounds)
+uint64_t RSAUtils::generateRandomPrime(int bits, int rounds)
 {
     /**
      * Generate a random prime number with the specified bits.
@@ -353,8 +353,8 @@ int RSAUtils::init(int rounds, bool defaultKey, bool highSecurity)
         // First, generate two random prime numbers p and q
         do
         {
-            p = generateRamdomPrime(32, rounds);
-            q = generateRamdomPrime(32, rounds);
+            p = generateRandomPrime(32, rounds);
+            q = generateRandomPrime(32, rounds);
             // In order to avoid overflow, we need to make sure p * q <= 2^64
             // At the same time, to make both of them as large as possible
         } while ((rounds--) && (p * q > 0xffffffffffffffff));

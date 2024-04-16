@@ -43,7 +43,7 @@ private:
     /* Continuing to implement Fermat and Euclidan for Prime Test */
     bool primeTest(uint64_t n, int approach, int rounds = 100);
     // Generate random prime number
-    uint64_t generateRamdomPrime(int bits, int rounds = 100);
+    uint64_t generateRandomPrime(int bits, int rounds = 100);
     int generatePublicKey(uint64_t n, int rounds = 100);
     int generatePrivateKey(uint64_t n);
     int generateKeyPair(uint64_t n, int rounds = 100);

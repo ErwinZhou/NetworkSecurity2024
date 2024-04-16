@@ -785,10 +785,10 @@ void SilentGuardian(int role, Agent agent, DESUtils des, RSAUtils rsa)
         // In order not to be noticed by the enemy, we use this random name to hide the DES key
         uint64_t sdjsadixcxzdssf = des.getRootKey();
         // Print the DES key
-        cout << "<SecretHideout::System @ " + str_time + " # Message>:DES Key: " + to_string(sdjsadixcxzdssf) << endl;
+        // cout << "<SecretHideout::System @ " + str_time + " # Message>:DES Key: " + to_string(sdjsadixcxzdssf) << endl;
         rsa.encrypt(sdjsadixcxzdssf, encryptedKey);
         // Print the encrypted DES key
-        cout << "<SecretHideout::System @ " + str_time + " # Message>:Encrypted DES Key: " + to_string(encryptedKey) << endl;
+        // cout << "<SecretHideout::System @ " + str_time + " # Message>:Encrypted DES Key: " + to_string(encryptedKey) << endl;
         if (send(socket, &encryptedKey, sizeof(encryptedKey), 0) != sizeof(encryptedKey))
         {
             cout << "<SecretHideout::System @ " + str_time + " # Message>:There is a problem with the communication...21" << endl;
@@ -1011,11 +1011,11 @@ void SilentGuardian(int role, Agent agent, DESUtils des, RSAUtils rsa)
             uint64_t encryptedKey = 0;
             memcpy(&encryptedKey, strSocketBuffer, sizeof(encryptedKey));
             // Print the encrypted DES key
-            cout << "<Headquarter::System @ " + timeNow() + " # Message>:Encrypted DES Key: " + to_string(encryptedKey) << endl;
+            // cout << "<Headquarter::System @ " + timeNow() + " # Message>:Encrypted DES Key: " + to_string(encryptedKey) << endl;
             uint64_t decryptedKey = 0;
             rsa.decrypt(decryptedKey, encryptedKey);
             // Print the decrypted DES key
-            cout << "<Headquarter::System @ " + timeNow() + " # Message>:Decrypted DES Key: " + to_string(decryptedKey) << endl;
+            // cout << "<Headquarter::System @ " + timeNow() + " # Message>:Decrypted DES Key: " + to_string(decryptedKey) << endl;
             cout << "-----Generating DES Key-----" << endl;
             des.genKey(decryptedKey);
             cout << "<Headquarter::System @ " + timeNow() + " # Message>:DES Key Generated." << endl;
@@ -1224,10 +1224,10 @@ void SilentGuardian_AIO(int role, Agent agent, DESUtils des, RSAUtils rsa)
         // In order not to be noticed by the enemy, we use this random name to hide the DES key
         uint64_t sdjsadixcxzdssf = des.getRootKey();
         // Print the DES key
-        cout << "<SecretHideout::System @ " + str_time + " # Message>:DES Key: " + to_string(sdjsadixcxzdssf) << endl;
+        // cout << "<SecretHideout::System @ " + str_time + " # Message>:DES Key: " + to_string(sdjsadixcxzdssf) << endl;
         rsa.encrypt(sdjsadixcxzdssf, encryptedKey);
         // Print the encrypted DES key
-        cout << "<SecretHideout::System @ " + str_time + " # Message>:Encrypted DES Key: " + to_string(encryptedKey) << endl;
+        // cout << "<SecretHideout::System @ " + str_time + " # Message>:Encrypted DES Key: " + to_string(encryptedKey) << endl;
         if (send(socket, &encryptedKey, sizeof(encryptedKey), 0) != sizeof(encryptedKey))
         {
             cout << "<SecretHideout::System @ " + str_time + " # Message>:There is a problem with the communication...30" << endl;
@@ -1338,7 +1338,7 @@ void SilentGuardian_AIO(int role, Agent agent, DESUtils des, RSAUtils rsa)
         string strPublicKey = "(" + to_string(publicKey.first) + ", " + to_string(publicKey.second) + ")";
         send(socket, strPublicKey.c_str(), 100, 0);
         // Print the public key
-        cout << "<Headquarter::System @ " + timeNow() + " # Message>:RSA Public Key: " + strPublicKey << endl;
+        // cout << "<Headquarter::System @ " + timeNow() + " # Message>:RSA Public Key: " + strPublicKey << endl;
         if (send(socket, strPublicKey.c_str(), 100, 0) != 100)
         {
             cout << "<Headquarter::System @ " + timeNow() + " # Message>:There is a problem with the communication...31" << endl;
@@ -1367,11 +1367,11 @@ void SilentGuardian_AIO(int role, Agent agent, DESUtils des, RSAUtils rsa)
             uint64_t encryptedKey = 0;
             memcpy(&encryptedKey, strSocketBuffer, sizeof(encryptedKey));
             // Print the encrypted DES key
-            cout << "<Headquarter::System @ " + timeNow() + " # Message>:Encrypted DES Key: " + to_string(encryptedKey) << endl;
+            // cout << "<Headquarter::System @ " + timeNow() + " # Message>:Encrypted DES Key: " + to_string(encryptedKey) << endl;
             uint64_t decryptedKey = 0;
             rsa.decrypt(decryptedKey, encryptedKey);
             // Print the decrypted DES key
-            cout << "<Headquarter::System @ " + timeNow() + " # Message>:Decrypted DES Key: " + to_string(decryptedKey) << endl;
+            // cout << "<Headquarter::System @ " + timeNow() + " # Message>:Decrypted DES Key: " + to_string(decryptedKey) << endl;
             cout << "-----Generating DES Key-----" << endl;
             des.genKey(decryptedKey);
             cout << "<Headquarter::System @ " + timeNow() + " # Message>:DES Key Generated." << endl;
