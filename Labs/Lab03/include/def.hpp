@@ -5,9 +5,19 @@
 
 #define DEFAULT_TMP_DIR "tmp"        // Default temporary directory for saving files for correctness application
 #define DEFAULT_FILE_NAME "test.txt" // Default file name
-#define DEFAULT_MD5_FILE "md5.txt"   // Default file name for MD5 hash
+#define DEFAULT_MD5_FILE "MD5.md5"   // Default file name for MD5 hash
 #define SUCCESS 0                    // Success return code
 #define FAILURE 1                    // Failure return code
-typedef int INT;                     // Define INT as an integer type
+#define MANUAL 0                     // Manual validation approach
+#define AUTO 1                       // Auto validation approach
+
+/* Options for CommandLine Interaction */
+#define pHelp "-h"     // Help option
+#define pTest "-t"     // Test option
+#define pCompute "-c"  // Compute option
+#define pValidate "-v" // Validate option
+#define pFile "-f"     // File option
+
+typedef int INT; // Define INT as an integer type
 
 #endif // MD5_DEFS_H
