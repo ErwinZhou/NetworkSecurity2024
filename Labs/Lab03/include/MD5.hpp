@@ -34,7 +34,6 @@ private:
     /**
      * Basic operations commonly used in MD5 algorithm
      */
-    INT mod(INT a, INT b);
     uint32_t F(uint32_t x, uint32_t y, uint32_t z);
     uint32_t G(uint32_t x, uint32_t y, uint32_t z);
     uint32_t H(uint32_t x, uint32_t y, uint32_t z);
@@ -51,10 +50,10 @@ private:
 
     INT roundHandler(const uint8_t block[64]); // Handler for each round of MD5 algorithm
 
-    INT update(const void *input, size_t length, INT advancedSecurity = 0);    // Bytes flow
-    INT update(const std::string &input_str, INT advancedSecurity = 0);        // String flow
-    INT update(std::ifstream &input_file, INT advancedSecurity = 0);           // File flow
-    INT update(const uint8_t *input, size_t length, INT advancedSecurity = 0); // Update the status of the MD5 object
+    INT update(const void *input, size_t length);    // Bytes flow
+    INT update(const std::string &input_str);        // String flow
+    INT update(std::ifstream &input_file);           // File flow
+    INT update(const uint8_t *input, size_t length); // Update the status of the MD5 object
 
     /**
      * Postprocessing for MD5
@@ -69,14 +68,10 @@ public:
 
     /**
      * Computing Message Digest for the input string or file
-     * @param advancedSecurity: advanced security level
-     *                          0 for basic security
-     *                          1 for Advanced Security-Divide and Merge
-     *                          >1 for Advanced Security-Times for Recusion of Computing MD5
      */
-    INT compute(const void *input, size_t length, INT advancedSecurity = 0); // Bytes flow
-    INT compute(const std::string &input_str, INT advancedSecurity = 0);     // String flow
-    INT compute(std::ifstream &input_file, INT advancedSecurity = 0);        // File flow
+    INT compute(const void *input, size_t length); // Bytes flow
+    INT compute(const std::string &input_str);     // String flow
+    INT compute(std::ifstream &input_file);        // File flow
 
     const uint8_t *getMessageDigest(); // Return the final message digest in Bytes form
     std::string toString();            // Return the final message digest in HEX string form

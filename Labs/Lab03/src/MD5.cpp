@@ -47,17 +47,6 @@ std::string MD5::bytesToHexString(const uint8_t *input, size_t length)
     return hexString;
 }
 // Basic operations commonly used in MD5 algorithm
-INT MD5::mod(INT a, INT b)
-{
-    /**
-     * Perform the mod operation for a and b, to ensure the result is non-negative
-     * @param a: the dividend
-     * @param b: the divisor
-     */
-    if (a < 0)
-        return a % b + b;
-    return a % b;
-}
 
 uint32_t MD5::F(uint32_t x, uint32_t y, uint32_t z)
 {
@@ -219,17 +208,12 @@ INT MD5::roundHandler(const uint8_t block[64])
     return SUCCESS;
 }
 
-INT MD5::update(const uint8_t *input, size_t length, INT advancedSecurity)
+INT MD5::update(const uint8_t *input, size_t length)
 {
     /**
      * Update the status of the MD5 message digest for the input Bytes flow of given length
-     * Apart from that, in order to defend the dictionary attack, the advanced security level is introduced
      * @param input: bytes flow of the input
      * @param length: the given bytes length of the input bytes flow
-     * @param advancedSecurity: the advanced security level
-     *                          0 for basic security
-     *                          1 for Advanced Security-Divide and Merge
-     *                          >1 for Advanced Security-Times for Recusion of Computing MD5
      */
     uint32_t i, remainingIndex, remainingLength;
     // To get the index of the bytes that are not processed yet and was stored in the buffer
@@ -243,38 +227,20 @@ INT MD5::update(const uint8_t *input, size_t length, INT advancedSecurity)
     // To get the number of bytes that are not processed yet
     remainingLength = 64 - remainingIndex;
 
-    switch (advancedSecurity)
+    /**
+     * Basic Security: Perform the basic MD5 algorithm
+     */
+    if (length >= remainingLength)
     {
-    case 0:
-        /**
-         * Basic Security: Perform the basic MD5 algorithm
-         */
-        if (length >= remainingLength)
-        {
-            memcpy(&bufferBlock[remainingIndex], input, remainingLength);
-            roundHandler(bufferBlock);
-            for (i = remainingLength; i + 63 < length; i += 64)
-                roundHandler(&input[i]);
-            remainingIndex = 0;
-        }
-        else
-            i = 0;
-        memcpy(&bufferBlock[remainingIndex], &input[i], length - i);
-        break;
-    case 1:
-        /**
-         * Advanced Security-Divide and Merge: Divide the input into blocks and merge the final message digest
-         */
-        // To be continued...
-        break;
-    default:
-        /**
-         * Advanced Security-Times for Recusion of Computing MD5
-         * Recursively compute the MD5 message digest for {advancedSecurity} times
-         */
-        // To be continued...
-        break;
+        memcpy(&bufferBlock[remainingIndex], input, remainingLength);
+        roundHandler(bufferBlock);
+        for (i = remainingLength; i + 63 < length; i += 64)
+            roundHandler(&input[i]);
+        remainingIndex = 0;
     }
+    else
+        i = 0;
+    memcpy(&bufferBlock[remainingIndex], &input[i], length - i);
     return SUCCESS;
 }
 
@@ -297,46 +263,34 @@ void MD5::encode(const uint32_t *input, uint8_t *output, size_t length)
 }
 
 // Different forms of interfaces for MD5
-INT MD5::update(const void *input, size_t length, INT advancedSecurity)
+INT MD5::update(const void *input, size_t length)
 {
     /**
      * Update the status of the MD5 object in bytes flow
      * @param input: bytes flow of the input
      * @param length: the given length of the input bytes flow
-     * @param advancedSecurity: the advanced security level
-     *                          0 for basic security
-     *                          1 for Advanced Security-Divide and Merge
-     *                          >1 for Advanced Security-Times for Recusion of Computing MD5
      */
     // Call upon on the base interface
-    update((const uint8_t *)input, length, advancedSecurity);
+    update((const uint8_t *)input, length);
     return SUCCESS;
 }
 
-INT MD5::update(const std::string &input_str, INT advancedSecurity)
+INT MD5::update(const std::string &input_str)
 {
     /**
      * Update the status of the MD5 object in string flow
      * @param input_str: the input string
-     * @param advancedSecurity: the advanced security level
-     *                          0 for basic security
-     *                          1 for Advanced Security-Divide and Merge
-     *                          >1 for Advanced Security-Times for Recusion of Computing MD5
      */
     // Call upon on the base interface
-    update(input_str.c_str(), input_str.length(), advancedSecurity);
+    update(input_str.c_str(), input_str.length());
     return SUCCESS;
 }
 
-INT MD5::update(std::ifstream &input_file, INT advancedSecurity)
+INT MD5::update(std::ifstream &input_file)
 {
     /**
      * Update the status of the MD5 object in file flow
      * @param input_file: the input file stream
-     * @param advancedSecurity: the advanced security level
-     *                          0 for basic security
-     *                          1 for Advanced Security-Divide and Merge
-     *                          >1 for Advanced Security-Times for Recusion of Computing MD5
      */
     // Read the file content
     input_file.seekg(0, std::ios::end);
@@ -346,7 +300,7 @@ INT MD5::update(std::ifstream &input_file, INT advancedSecurity)
     std::vector<char> buffer(size);
     if (input_file.read(buffer.data(), size))
         // Call upon on the base interface
-        update((const uint8_t *)buffer.data(), size, advancedSecurity);
+        update((const uint8_t *)buffer.data(), size);
     else
         return FAILURE;
     return SUCCESS;
@@ -389,56 +343,44 @@ void MD5::finalize()
     return;
 }
 
-INT MD5::compute(const void *input, size_t length, INT advancedSecurity)
+INT MD5::compute(const void *input, size_t length)
 {
     /**
      * Computing the MD5 message digest for the input bytes flow
      * @param input: bytes flow of the input
      * @param length: the given length of the input bytes flow
-     * @param advancedSecurity: the advanced security level
-     *                          0 for basic security
-     *                          1 for Advanced Security-Divide and Merge
-     *                          >1 for Advanced Security-Times for Recusion of Computing MD5
      */
     // Reset all the parameters in the MD5 to clear out the status
     reset();
-    if (update(input, length, advancedSecurity) == FAILURE)
+    if (update(input, length) == FAILURE)
         return FAILURE;
     finalize();
     return SUCCESS;
 }
 
-INT MD5::compute(const std::string &input_string, INT advancedSecurity)
+INT MD5::compute(const std::string &input_string)
 {
     /**
      * Computing the MD5 message digest for the input string
      * @param input_string: the input string
-     * @param advancedSecurity: the advanced security level
-     *                          0 for basic security
-     *                          1 for Advanced Security-Divide and Merge
-     *                          >1 for Advanced Security-Times for Recusion of Computing MD5
      */
     // Reset all the parameters in the MD5 to clear out the status
     reset();
-    if (update(input_string, advancedSecurity) == FAILURE)
+    if (update(input_string) == FAILURE)
         return FAILURE;
     finalize();
     return SUCCESS;
 }
 
-INT MD5::compute(std::ifstream &input_file, INT advancedSecurity)
+INT MD5::compute(std::ifstream &input_file)
 {
     /**
      * Computing the MD5 message digest for the input file
      * @param input_file: the input file stream
-     * @param advancedSecurity: the advanced security level
-     *                          0 for basic security
-     *                          1 for Advanced Security-Divide and Merge
-     *                          >1 for Advanced Security-Times for Recusion of Computing MD5
      */
     // Reset all the parameters in the MD5 to clear out the status
     reset();
-    if (update(input_file, advancedSecurity) == FAILURE)
+    if (update(input_file) == FAILURE)
         return FAILURE;
     finalize();
     return SUCCESS;
