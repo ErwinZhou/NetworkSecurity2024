@@ -9,3 +9,7 @@
 
 inline void help(const char *program);
 INT ping(std::string ip, int times);
+inline INT TCPConnectScan(std::string ip, int beginPort, int endPort, INT mode);
+inline INT TCPSyncan(std::string ip, int beginPort, int endPort, INT mode);
+inline INT TCPFinScan(std::string ip, int beginPort, int endPort, INT mode);
+inline INT UDPScan(std::string ip, int beginPort, int endPort, INT mode);

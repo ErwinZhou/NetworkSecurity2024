@@ -36,4 +36,9 @@ typedef int INT;
 #define FAILURE 0
 #define ERROR -1
 #define TIMEOUT -2
+
+// Manually or Automatically input
+#define MANUAL 0
+#define AUTO 1
+
 #endif // DEF_HPP
