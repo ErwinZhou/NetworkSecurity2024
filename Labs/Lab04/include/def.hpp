@@ -21,7 +21,7 @@ typedef int INT;
 #define DEFAULT_HOST_TEST_IP "110.242.68.66" // 110.242.68.66 is the IPv4 address for www.baidu.com, which is used for testing
 #define MAX_BUFFERS_SIZE 1024
 #define MAX_TIMEOUT 3600
-#define DEFAULT_PING_TIMES 10
+#define DEFAULT_PING_TIMES 3
 
 // Arguments
 #define ARG_HELP "-h"
@@ -41,4 +41,27 @@ typedef int INT;
 #define MANUAL 0
 #define AUTO 1
 
+/* Struct Definitions */
+
+// TCP Connect Scan Struct
+struct TCPConnectHostThreadParam
+{
+    /**
+     * The struct for the parameters of the TCP Connect Scanning for the specific port
+     */
+    std::string hostIP; // The IP address of the host
+    int localPort;      // The port of the local host
+    int port;           // The port for scanning
+};
+
+struct TCPConnectThreadParam
+{
+    /**
+     * The struct for the parameters of the TCP Connect Scanning for the range of ports
+     */
+    std::string hostIP; // The IP address of the host
+    int localPort;      // The port of the local host
+    int beginPort;      // The begin port for scanning
+    int endPort;        // The end port for scanning
+};
 #endif // DEF_HPP

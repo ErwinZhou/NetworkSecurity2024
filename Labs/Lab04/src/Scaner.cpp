@@ -50,6 +50,7 @@ INT ping(std::string ip, int times)
 
     return SUCCESS;
 }
+
 inline void help(const char *program)
 {
     /**
@@ -100,6 +101,31 @@ inline INT TCPConnectScan(std::string ip, int beginPort, int endPort, INT mode)
      *             MANUAL(0) for manually input
      *             AUTO(1) for automatically input
      */
+    std::cout << "----------------------------- TCP Connect Scan ------------------------------" << std::endl;
+    if (mode == MANUAL)
+    {
+        // If the mode is manual, input the begin port and end port
+        std::cout << "[INFO] Please input the range of port(0-65535)..." << std::endl;
+        std::cout << "Begin port: ";
+        std::cin >> beginPort;
+        std::cout << "End port: ";
+        std::cin >> endPort;
+        // Ping the target IP address first to make sure it is alive
+        INT ret = ping(ip, DEFAULT_PING_TIMES);
+        // If the ping is failed, return the error directly and stop the scanning
+        if (ret == FAILURE || ret == ERROR || ret == TIMEOUT)
+            return ret;
+
+        // Begin the TCP Connect Scan
+        std::cout << "[INFO] TCP Connect Scan Host " << ip << " port " << beginPort << "~" << endPort << "..." << std::endl;
+
+        // Initialize the TCP Connect Scan Utils
+        TCPConnectScanUtil tcpConnectScanUtil(ip, DEFAULT_LOCAL_PORT, DEFAULT_LOCAL_INET_IP, beginPort, endPort);
+    }
+    else if (mode == AUTO)
+    {
+        // If the mode if auto, it means that the port range has already been given by the CML arguments
+    }
     return SUCCESS;
 }
 
@@ -253,7 +279,7 @@ int main(int argc, char *argv[])
                     return 1;
                 }
                 ret = TCPConnectScan(argv[2], std::stoi(argv[3]), std::stoi(argv[4]), AUTO);
-                if (ret == ERROR || ret == TIMEOUT)
+                if (ret == ERROR || ret == TIMEOUT || ret == FAILURE)
                 {
                     help(argv[0]);
                     return 1;
@@ -272,7 +298,7 @@ int main(int argc, char *argv[])
                 }
                 // Manually input the begin port and end port
                 ret = TCPConnectScan(argv[2], 0, 0, MANUAL);
-                if (ret == ERROR || ret == TIMEOUT)
+                if (ret == ERROR || ret == TIMEOUT || ret == FAILURE)
                 {
                     help(argv[0]);
                     return 1;
@@ -314,7 +340,7 @@ int main(int argc, char *argv[])
                 }
 
                 ret = TCPSyncan(argv[2], std::stoi(argv[3]), std::stoi(argv[4]), AUTO);
-                if (ret == ERROR || ret == TIMEOUT)
+                if (ret == ERROR || ret == TIMEOUT || ret == FAILURE)
                 {
                     help(argv[0]);
                     return 1;
@@ -333,7 +359,7 @@ int main(int argc, char *argv[])
                 }
                 // Manually input the begin port and end port
                 ret = TCPSyncan(argv[2], 0, 0, MANUAL);
-                if (ret == ERROR || ret == TIMEOUT)
+                if (ret == ERROR || ret == TIMEOUT || ret == FAILURE)
                 {
                     help(argv[0]);
                     return 1;
@@ -374,7 +400,7 @@ int main(int argc, char *argv[])
                 }
 
                 ret = TCPFinScan(argv[2], std::stoi(argv[3]), std::stoi(argv[4]), AUTO);
-                if (ret == ERROR || ret == TIMEOUT)
+                if (ret == ERROR || ret == TIMEOUT || ret == FAILURE)
                 {
                     help(argv[0]);
                     return 1;
@@ -393,7 +419,7 @@ int main(int argc, char *argv[])
                 }
                 // Manually input the begin port and end port
                 ret = TCPFinScan(argv[2], 0, 0, MANUAL);
-                if (ret == ERROR || ret == TIMEOUT)
+                if (ret == ERROR || ret == TIMEOUT || ret == FAILURE)
                 {
                     help(argv[0]);
                     return 1;
@@ -434,7 +460,7 @@ int main(int argc, char *argv[])
                 }
 
                 ret = UDPScan(argv[2], std::stoi(argv[3]), std::stoi(argv[4]), AUTO);
-                if (ret == ERROR || ret == TIMEOUT)
+                if (ret == ERROR || ret == TIMEOUT || ret == FAILURE)
                 {
                     help(argv[0]);
                     return 1;
@@ -453,7 +479,7 @@ int main(int argc, char *argv[])
                 }
                 // Manually input the begin port and end port
                 ret = UDPScan(argv[2], 0, 0, MANUAL);
-                if (ret == ERROR || ret == TIMEOUT)
+                if (ret == ERROR || ret == TIMEOUT || ret == FAILURE)
                 {
                     help(argv[0]);
                     return 1;
