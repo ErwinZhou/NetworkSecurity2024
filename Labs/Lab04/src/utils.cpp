@@ -101,3 +101,38 @@ bool isValidPort(int beginPort, int endPort)
         return false;
     return true;
 }
+
+// The log processing thread for the log message
+void logProcessingThread(ThreadSafeQueue<LogMessage> &logQueue, int beginPort, int endPort)
+{
+    /**
+     * The log processing thread for the log message
+     * This thread makes sure that the log message is orderly and intactly printed according to the port number
+     * @param logQueue The log queue
+     * @param beginPort The begin port
+     * @param endPort The end port
+     */
+    // Define the variables
+    std::map<int, std::string> logMap;
+    int expectedPort = beginPort;
+
+    // The main loop
+    while (true)
+    {
+        // Get one log message from the queue and store it in the map
+        LogMessage log = logQueue.pop();
+        logMap[log.port] = log.message;
+        // Check the map to see if there is any expected log message
+        while (logMap.count(expectedPort))
+        {
+            // Continusly print the log message until the expected port is not in the map yet
+            std::cout << logMap[expectedPort] << std::endl;
+            logMap.erase(expectedPort);
+            expectedPort++;
+        }
+
+        if ((expectedPort > endPort) && logQueue.empty())
+            // If the expected port is greater than the end port and the queue is empty, then break the loop
+            break;
+    }
+}

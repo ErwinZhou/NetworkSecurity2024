@@ -101,6 +101,13 @@ inline INT TCPConnectScan(std::string ip, int beginPort, int endPort, INT mode)
      *             MANUAL(0) for manually input
      *             AUTO(1) for automatically input
      */
+    // Declare the variables
+    INT ret;
+    pthread_attr_t attr;
+    pthread_t childThreadID;
+    struct TCPConnectThreadParam param;
+    int status;
+
     std::cout << "----------------------------- TCP Connect Scan ------------------------------" << std::endl;
     if (mode == MANUAL)
     {
@@ -110,21 +117,53 @@ inline INT TCPConnectScan(std::string ip, int beginPort, int endPort, INT mode)
         std::cin >> beginPort;
         std::cout << "End port: ";
         std::cin >> endPort;
-        // Ping the target IP address first to make sure it is alive
-        INT ret = ping(ip, DEFAULT_PING_TIMES);
-        // If the ping is failed, return the error directly and stop the scanning
-        if (ret == FAILURE || ret == ERROR || ret == TIMEOUT)
-            return ret;
-
-        // Begin the TCP Connect Scan
-        std::cout << "[INFO] TCP Connect Scan Host " << ip << " port " << beginPort << "~" << endPort << "..." << std::endl;
-
-        // Initialize the TCP Connect Scan Utils
-        TCPConnectScanUtil tcpConnectScanUtil(ip, DEFAULT_LOCAL_PORT, DEFAULT_LOCAL_INET_IP, beginPort, endPort);
     }
-    else if (mode == AUTO)
+    /* mode == AUTO */
+    // If the mode if AUTO, it means that the port range has already been given by the CML arguments
+    // Ping the target IP address first to make sure it is alive
+    ret = ping(ip, DEFAULT_PING_TIMES);
+    // If the ping is failed, return the error directly and stop the scanning
+    if (ret == FAILURE || ret == ERROR || ret == TIMEOUT)
+        return ret;
+
+    // Begin the TCP Connect Scan
+    std::cout << "[INFO] TCP Connect Scan Host " << ip << " port " << beginPort << "~" << endPort << "..." << std::endl;
+
+    // Assign the struct for the parameters
+    param.hostIP = ip;
+    param.beginPort = beginPort;
+    param.endPort = endPort;
+
+    // Initialize the threads for scanning, calling upon the Thread_TCPConnectScan function
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+
+    // Create the child thread
+    ret = pthread_create(&childThreadID, &attr, TCPConnectScanUtil::Thread_TCPConnectScan, (void *)&param);
+
+    // Check if the thread is created successfully
+    if (ret != 0)
     {
-        // If the mode if auto, it means that the port range has already been given by the CML arguments
+        // Error
+        std::cerr << "[ERROR] Failed to create the thread for the TCP Connect Scanning on ip address " << ip << " and port " << beginPort << "~" << endPort << std::endl;
+        return FAILURE;
+    }
+
+    // Wait for the child thread to finish
+    pthread_join(childThreadID, (void **)&status);
+
+    // Check the status of the thread
+    if (status == SUCCESS)
+    {
+        std::cout << "[INFO] TCP Connect Scan Host " << ip << " port " << beginPort << "~" << endPort << " successfully" << std::endl;
+        std::cout << "---------------------------------------------------------------------------" << std::endl;
+        return SUCCESS;
+    }
+    else
+    {
+        std::cerr << "[ERROR] TCP Connect Scan Host " << ip << " port " << beginPort << "~" << endPort << " FAILED" << std::endl;
+        std::cout << "---------------------------------------------------------------------------" << std::endl;
+        return FAILURE;
     }
     return SUCCESS;
 }
