@@ -28,16 +28,18 @@ void *TCPSynScanUtil::Thread_TCPSynHost(void *param)
     INT ret;
     int len;
     std::string logMessage;
-    char *sendBuffer;             // The buffer for sending the SYN package
-    char *recvBuffer;             // The buffer for receiving the SYN/ACK package
-    struct pseudohdr *ptcph;      // The pseudo header for the TCP package
-    struct tcphdr *tcph;          // The TCP header for the TCP package
-    struct iphdr *recvIPHeader;   // The IP header for the received package
-    struct tcphdr *recvTCPHeader; // The TCP header for the received package
-    std::string sourceHostIP;     // The IP address of the source host
-    std::string destHostIP;       // The IP address of the destination host
-    int sourcePort;               // The port of the source host
-    int destPort;                 // The port of the destination host
+    char *sendBuffer;              // The buffer for sending the SYN package
+    char *recvBuffer;              // The buffer for receiving the SYN/ACK package
+    struct pseudohdr *ptcph;       // The pseudo header for the TCP package
+    struct tcphdr *tcph;           // The TCP header for the TCP package
+    struct iphdr *recvIPHeader;    // The IP header for the received package
+    struct tcphdr *recvTCPHeader;  // The TCP header for the received package
+    std::string sourceHostIP;      // The IP address of the source host
+    std::string destHostIP;        // The IP address of the destination host
+    int sourcePort;                // The port of the source host
+    int destPort;                  // The port of the destination host
+    struct timeval waitingStartTP; // The start time point for waiting
+    struct timeval waitingEndTP;   // The end time point for waiting
 
     // Get the parameters
     p = (TCPSynHostThreadParam *)param;
@@ -47,7 +49,7 @@ void *TCPSynScanUtil::Thread_TCPSynHost(void *param)
     localPort = p->localPort;
 
     // Create the syn scanning socket
-    synSocket = socket(PF_INET, SOCK_RAW, IPPROTO_TCP);
+    synSocket = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
     // Check the socket
     if (synSocket < 0)
     {
@@ -56,6 +58,15 @@ void *TCPSynScanUtil::Thread_TCPSynHost(void *param)
         pthread_mutex_lock(&errorStatusMutex);
         errorStatus = ERROR;
         pthread_mutex_unlock(&errorStatusMutex);
+
+        // Clear the resources
+        delete p;
+        close(synSocket);
+        // Decrease the thread number
+        pthread_mutex_lock(&TCPSynThreadNumMutex);
+        TCPSynThreadNum--;
+        pthread_mutex_unlock(&TCPSynThreadNumMutex);
+
         pthread_exit((void *)ERROR);
     }
 
@@ -97,7 +108,7 @@ void *TCPSynScanUtil::Thread_TCPSynHost(void *param)
 
     // Compute the cksum using in_cksum
     // 12(Pseudo TCP Header) + 20(TCP Header)
-    tcph->th_sum = in_cksum((unsigned short *)tcph, 20 + 12);
+    tcph->th_sum = in_cksum((unsigned short *)ptcph, 20 + 12);
 
     // Send the SYN package without the pseudo header
     len = sendto(synSocket, tcph, 20, 0, (struct sockaddr *)&SYNScanHostAddress, sizeof(SYNScanHostAddress));
@@ -110,66 +121,112 @@ void *TCPSynScanUtil::Thread_TCPSynHost(void *param)
         pthread_mutex_lock(&errorStatusMutex);
         errorStatus = ERROR;
         pthread_mutex_unlock(&errorStatusMutex);
+
+        // Clear the resources
+        delete p;
+        close(synSocket);
+        // Decrease the thread number
+        pthread_mutex_lock(&TCPSynThreadNumMutex);
+        TCPSynThreadNum--;
+        pthread_mutex_unlock(&TCPSynThreadNumMutex);
+
         pthread_exit((void *)ERROR);
     }
 
-    // Take the SYN/ACK Package as a file descriptor, using ssize_t read (int fd, void *buf, size_t count)
-    len = read(synSocket, recvBuffer, MAX_BUFFERS_SIZE);
+    // Set the socket to non-block mode
+    ret = fcntl(synSocket, F_SETFL, O_NONBLOCK);
 
-    // Check the read results
-    if (len < 0)
+    if (ret < 0)
     {
-        // Error receiving the SYN/ACK package
-        std::cerr << "[ERROR] Failed to read the SYN/ACK package for the TCP Syn Scanning on ip address " << hostIP << " and port " << port << std::endl;
+        // Error setting the socket to non-block mode
+        std::cerr << "[ERROR] Failed to set the socket to non-block mode for the TCP Syn Scanning on ip address " << hostIP << " and port " << port << std::endl;
         pthread_mutex_lock(&errorStatusMutex);
         errorStatus = ERROR;
         pthread_mutex_unlock(&errorStatusMutex);
+
+        // Clear the resources
+        delete p;
+        close(synSocket);
+        // Decrease the thread number
+        pthread_mutex_lock(&TCPSynThreadNumMutex);
+        TCPSynThreadNum--;
+        pthread_mutex_unlock(&TCPSynThreadNumMutex);
+
         pthread_exit((void *)ERROR);
     }
 
-    // If the control flow reaches here, the SYN/ACK package is received
-    /* Parse the SYN/ACK Package */
-    // Get the IP Header and TCP Header
-    recvIPHeader = (struct iphdr *)recvBuffer;
-    recvTCPHeader = (struct tcphdr *)(recvBuffer + (recvIPHeader->ihl << 2));
+    // Busy waiting for the TCP Reply
+    gettimeofday(&waitingStartTP, NULL);
 
-    // Get the source and destination IP address
-    sourceHostIP = inet_ntoa(*(struct in_addr *)&recvIPHeader->saddr);
-    destHostIP = inet_ntoa(*(struct in_addr *)&recvIPHeader->daddr);
-    // Get the source and destination port
-    sourcePort = ntohs(recvTCPHeader->source);
-    destPort = ntohs(recvTCPHeader->dest);
-
-    /**
-     * Check if the requirements are met:
-     * (1) Check if the source/dest IP and Port matches
-     * (2) Check if the package type if SYN/ACK
-     */
-    // Check if the source/dest IP and Port matches
-    if (sourceHostIP == hostIP && destHostIP == localHostIP && sourcePort == port && destPort == localPort)
+    while (true)
     {
-        // Check if the package type if SYN/ACK
-        if (recvTCPHeader->th_flags == (TH_SYN | TH_ACK))
+        // Take the SYN/ACK Package as a file descriptor, using ssize_t read (int fd, void *buf, size_t count)
+        len = read(synSocket, recvBuffer, MAX_BUFFERS_SIZE);
+
+        // Check the read results
+        if (len > 0)
         {
-            // The port is open
-            logMessage = "Port " + std::to_string(port) + " is open";
-            logQueue.push(LogMessage{port, logMessage});
+            // If the control flow reaches here, the SYN/ACK package is received
+            /* Parse the SYN/ACK Package */
+            // Get the IP Header and TCP Header
+            recvIPHeader = (struct iphdr *)recvBuffer;
+            recvTCPHeader = (struct tcphdr *)(recvBuffer + (recvIPHeader->ihl << 2));
+
+            // Get the source and destination IP address
+            sourceHostIP = inet_ntoa(*(struct in_addr *)&recvIPHeader->saddr);
+            destHostIP = inet_ntoa(*(struct in_addr *)&recvIPHeader->daddr);
+            // Get the source and destination port
+            sourcePort = ntohs(recvTCPHeader->source);
+            destPort = ntohs(recvTCPHeader->dest);
+            /**
+             * Check if the requirements are met:
+             * (1) Check if the source/dest IP and Port matches
+             * (2) Check if the package type if SYN/ACK
+             */
+            // Check if the source/dest IP and Port matches
+            if (sourceHostIP == hostIP && destHostIP == localHostIP && sourcePort == port && destPort == localPort)
+            {
+                // Debug
+                // std::cout << "[INFO] th_flags: 0x" << std::hex << static_cast<int>(recvTCPHeader->th_flags) << std::dec << std::endl;
+                // Check if the package type if SYN/ACK
+                if ((recvTCPHeader->th_flags & (TH_SYN | TH_ACK)) == (TH_SYN | TH_ACK))
+                {
+                    // The port is open
+                    logMessage = "[INFO] Host: " + hostIP + " Port: " + std::to_string(port) + " open!";
+                    break;
+                }
+                else if ((recvTCPHeader->th_flags & (TH_RST | TH_ACK)) == (TH_RST | TH_ACK))
+                {
+                    // If the received package type is RST/ACK, the port is closed
+                    logMessage = "[INFO] Host: " + hostIP + " Port: " + std::to_string(port) + " closed!";
+                    break;
+                }
+            }
         }
-        else if (recvTCPHeader->th_flags == TH_RST)
+
+        // If the control flow reaches here, due to the non-block mode of the socket
+        // Check the time to avoid the infinite loop
+        gettimeofday(&waitingEndTP, NULL);
+        if ((1000000 *
+                 (waitingEndTP.tv_sec - waitingStartTP.tv_sec) +
+             (waitingEndTP.tv_usec - waitingStartTP.tv_usec)) /
+                1000000.0 >
+            MAX_SYN_TIMEOUT)
         {
-            // If the received package type is RST, the port is closed
-            logMessage = "Port " + std::to_string(port) + " is closed";
-            logQueue.push(LogMessage{port, logMessage});
+            // Timeout without receiving the SYN/ACK package
+            // But due to the previous success ping results, the port is filtered by the firewall
+            logMessage = "[INFO] Host: " + hostIP + " Port: " + std::to_string(port) + " filtered!";
+            break;
         }
     }
-    else
-    {
-        // If the source/dest IP and Port do not match
-        // Drops it anyway
-    }
 
+    // Finish sending and reading socket SYN Package, free the resources
     delete p;
     close(synSocket);
+
+    // Push the log message to the queue
+    LogMessage log = {port, logMessage};
+    logQueue.push(log);
 
     // Decrease the thread number
     pthread_mutex_lock(&TCPSynThreadNumMutex);

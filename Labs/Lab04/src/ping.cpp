@@ -101,7 +101,7 @@ INT ICMPUtil::ping(int times)
     while (pingtimes < times || times == 0)
     {
 
-        sleep(2); // Sleep for 2 seconds
+        sleep(1); // Sleep for 2 seconds
 
         // Update the ICMP header sequence number and timestamp
         sendICMPHeader->icmp_seq = htons(pingtimes + 2);
@@ -162,7 +162,7 @@ INT ICMPUtil::ping(int times)
                      (waitingEndTP.tv_sec - waitingStartTP.tv_sec) +
                  (waitingEndTP.tv_usec - waitingStartTP.tv_usec)) /
                     1000000.0 >
-                MAX_TIMEOUT)
+                MAX_PING_TIMEOUT)
                 return TIMEOUT;
         }
         if (flag == false)

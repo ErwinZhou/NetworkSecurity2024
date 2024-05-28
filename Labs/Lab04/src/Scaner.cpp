@@ -298,7 +298,7 @@ int main(int argc, char *argv[])
         {
             // If the option is help, print the help information
             help(argv[0]);
-            return 1;
+            return 0;
         }
         else if (optionArg == ARG_PING)
         {

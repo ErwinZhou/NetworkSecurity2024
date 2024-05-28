@@ -44,6 +44,15 @@ void *TCPConnectScanUtil::Thread_TCPConnectHost(void *param)
         pthread_mutex_lock(&TCPConnectThreadNumMutex);
         errorStatus = ERROR;
         pthread_mutex_unlock(&errorStatusMutex);
+
+        // Clear the resources
+        delete p;
+        close(connectSocket);
+        // Decrease the number of threads
+        pthread_mutex_lock(&TCPConnectThreadNumMutex);
+        TCPConnectThreadNum--;
+        pthread_mutex_unlock(&TCPConnectThreadNumMutex);
+
         pthread_exit((void *)ERROR);
     }
 
@@ -76,7 +85,9 @@ void *TCPConnectScanUtil::Thread_TCPConnectHost(void *param)
     else
         // std::cout << "[INFO] Host: " << hostIP << " Port: " << port << " open!" << std::endl;
         logMessage = "[INFO] Host: " + hostIP + " Port: " + std::to_string(port) + " open!";
-    // Close the socket
+
+    // Clear the resources
+    delete p;
     close(connectSocket);
 
     // Push the log message to the queue

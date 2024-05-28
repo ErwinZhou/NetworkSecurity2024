@@ -11,7 +11,8 @@
 #include <sys/socket.h> // socket, AF_INET, SOCK_STREAM
 #include <arpa/inet.h>  // sockaddr_in, inet_addr, htons
 #include <unistd.h>     // sleep
-
+#include <sys/time.h>   // struct timeval
+#include <fcntl.h>      //  fcntl, F_SETFL, O_NONBLOCK
 class TCPSynScanUtil
 {
 private:
