@@ -16,6 +16,7 @@ ICMPUtil::ICMPUtil(std::string hostIP, int localPort, std::string localHostIP) :
     pingtimes = 0;
     flag = false;
 }
+
 INT ICMPUtil::ping(int times)
 {
     /**

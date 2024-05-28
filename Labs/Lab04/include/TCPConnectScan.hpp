@@ -1,4 +1,4 @@
-// // The constants, variables and declarations about the TCP Connect Scanning using TCP protocol
+// The constants, variables and declarations about the TCP Connect Scanning using TCP protocol
 
 #ifndef TCP_CONNECT_SCAN_HPP
 #define TCP_CONNECT_SCAN_HPP

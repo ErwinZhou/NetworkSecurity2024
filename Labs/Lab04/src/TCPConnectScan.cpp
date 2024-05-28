@@ -8,7 +8,6 @@ pthread_mutex_t TCPConnectScanUtil::TCPConnectThreadNumMutex;
 int TCPConnectScanUtil::errorStatus;
 pthread_mutex_t TCPConnectScanUtil::errorStatusMutex;
 ThreadSafeQueue<LogMessage> TCPConnectScanUtil::logQueue;
-
 /* Mutil Thread Scanning functions for the TCP Connect Scanning */
 
 // Scan on the specific port in this thread
@@ -18,7 +17,7 @@ void *TCPConnectScanUtil::Thread_TCPConnectHost(void *param)
      * The base function to TCP scan for the specific port
      * Using mutil-threadinng to improve the performance
      * @param param: The port number
-     * @return: SUCCESS or FAILURE
+     * @return: WHATEVER, due to the detached state of the threads
      */
     // Declare the variables
     struct TCPConnectHostThreadParam *p;
@@ -94,6 +93,7 @@ void *TCPConnectScanUtil::Thread_TCPConnectHost(void *param)
 
     std::cout << "Thread_TCPConnectHost Bye Bye" << std::endl;
 }
+
 // Initialize the threads for scanning, calling upon the Thread_TCPConnectHost function
 void *TCPConnectScanUtil::Thread_TCPConnectScan(void *param)
 {
@@ -101,7 +101,7 @@ void *TCPConnectScanUtil::Thread_TCPConnectScan(void *param)
      * The advanced function to TCP scan for the range of ports, calling upon the Thread_TCPConnectHost function
      * Using mutil-threadinng to improve the performance
      * @param param: The port range
-     * @return: SUCCESS or FAILURE
+     * @return: SUCCESS or ERROR
      */
 
     // Declare the variables
@@ -174,9 +174,7 @@ void *TCPConnectScanUtil::Thread_TCPConnectScan(void *param)
         pthread_mutex_unlock(&TCPConnectThreadNumMutex);
         // In order to avoid too many threads, we need to wait for a while
         while (TCPConnectThreadNum > 100)
-        {
             sleep(3);
-        }
     }
 
     // If the control flow reaches here, the scanning of the range of ports has been successful assigned to the threads

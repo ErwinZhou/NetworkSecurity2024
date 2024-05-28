@@ -25,7 +25,7 @@ typedef int INT;
 #define DEFAULT_LOCAL_PORT 3015
 #define DEFAULT_HOST_IP "127.0.0.1"
 #define DEFAULT_HOST_TEST_IP "110.242.68.66" // 110.242.68.66 is the IPv4 address for www.baidu.com, which is used for testing
-#define MAX_BUFFERS_SIZE 1024
+#define MAX_BUFFERS_SIZE 8192
 #define MAX_TIMEOUT 3600
 #define DEFAULT_PING_TIMES 3
 
@@ -101,6 +101,20 @@ public:
 };
 
 /* Struct Definitions */
+// Pseudo TCP Header
+struct pseudohdr
+{
+    /**
+     * This struct is used for the pseudo header of the TCP package
+     * To calculate the checksum of the TCP package
+     */
+    uint32_t saddr;   // Source IP address
+    uint32_t daddr;   // Destination IP address
+    uint8_t useless;  // To fill the 8 bits of 0
+    uint8_t protocol; // Protocol type
+    uint16_t length;  // The length of the TCP package
+};
+
 // Mutil-Thread Communication Struct - LogMessage
 struct LogMessage
 {
@@ -131,5 +145,29 @@ struct TCPConnectThreadParam
     std::string hostIP; // The IP address of the host
     int beginPort;      // The begin port for scanning
     int endPort;        // The end port for scanning
+};
+
+// TCP Syn Scan struct
+struct TCPSynHostThreadParam
+{
+    /**
+     * The struct for the parameters of the TCP Syn Scanning for the specific port
+     */
+    std::string hostIP;      // The IP address of the host
+    int port;                // The port for scanning
+    std::string localHostIP; // The IP address of the local host
+    int localPort;           // The port of the local host
+};
+
+struct TCPSynThreadParam
+{
+    /**
+     * The struct for the parameters of the TCP Syn Scanning for the range of ports
+     */
+    std::string hostIP;      // The IP address of the host
+    std::string localHostIP; // The IP address of the local host
+    int beginPort;           // The begin port for scanning
+    int endPort;             // The end port for scanning
+    int localPort;           // The port of the local host
 };
 #endif // DEF_HPP
