@@ -14,7 +14,7 @@ ICMPUtil::ICMPUtil(std::string hostIP, int localPort, std::string localHostIP) :
     recvBuffer = (char *)malloc(MAX_BUFFERS_SIZE);
     memset(recvBuffer, 0, MAX_BUFFERS_SIZE);
     pingtimes = 0;
-    flag = false;
+    flag = true;
 }
 
 INT ICMPUtil::ping(int times)
@@ -88,7 +88,7 @@ INT ICMPUtil::ping(int times)
     pingHostAddr.sin_addr.s_addr = inet_addr(hostIP.c_str()); // Convert the IP address to the network byte order
     addrLen = sizeof(pingHostAddr);
 
-    // Send the ICMP Request
+    // // Send the ICMP Request
     if (sendto(pingSocket, sendBuffer, sendBufferSize, 0, (struct sockaddr *)&pingHostAddr, addrLen) == -1)
         return ERROR;
 
@@ -100,25 +100,27 @@ INT ICMPUtil::ping(int times)
     gettimeofday(&waitingStartTP, NULL);
     while (pingtimes < times || times == 0)
     {
+        if (flag == false)
+        {
+            sleep(1); // Sleep for 2 seconds
 
-        sleep(1); // Sleep for 2 seconds
+            // Update the ICMP header sequence number and timestamp
+            sendICMPHeader->icmp_seq = htons(pingtimes + 1);
+            tp = (struct timeval *)(sendBuffer + sizeof(struct ip) + sizeof(struct icmp));
+            gettimeofday(tp, NULL);
 
-        // Update the ICMP header sequence number and timestamp
-        sendICMPHeader->icmp_seq = htons(pingtimes + 2);
-        tp = (struct timeval *)(sendBuffer + sizeof(struct ip) + sizeof(struct icmp));
-        gettimeofday(tp, NULL);
+            // Recompute the checksum of the ICMP Header
+            sendICMPHeader->icmp_cksum = 0;
+            sendICMPHeader->icmp_cksum = in_cksum((unsigned short *)sendICMPHeader, sizeof(struct icmp) + sizeof(struct timeval) + 40);
 
-        // Recompute the checksum of the ICMP Header
-        sendICMPHeader->icmp_cksum = 0;
-        sendICMPHeader->icmp_cksum = in_cksum((unsigned short *)sendICMPHeader, sizeof(struct icmp) + sizeof(struct timeval) + 40);
+            // Send the ICMP Request
+            if (sendto(pingSocket, sendBuffer, sendBufferSize, 0, (struct sockaddr *)&pingHostAddr, addrLen) == -1)
+                return ERROR;
 
-        // Send the ICMP Request
-        if (sendto(pingSocket, sendBuffer, sendBufferSize, 0, (struct sockaddr *)&pingHostAddr, addrLen) == -1)
-            return ERROR;
-
-        gettimeofday(&waitingStartTP, NULL);
-        // Set the flag to false for avoiding sending another ICMP Package immediately without receving the last one
-        flag = false;
+            gettimeofday(&waitingStartTP, NULL);
+            // Set the flag to false for avoiding sending another ICMP Package immediately without receving the last one
+            flag = false;
+        }
 
         while (true)
         {
@@ -150,7 +152,7 @@ INT ICMPUtil::ping(int times)
 
                     std::cout << ret << " bytes from " << hostIP << ": icmp_seq=" << ntohs(recvICMPHeader->icmp_seq) << " ttl=" << (int)recvIPHeader->ip_ttl << " time=" << elapsedTime << " ms" << std::endl;
                     pingtimes++;
-                    flag = true;
+                    flag = false;
                     break;
                 }
             }
@@ -164,10 +166,6 @@ INT ICMPUtil::ping(int times)
                     1000000.0 >
                 MAX_PING_TIMEOUT)
                 return TIMEOUT;
-        }
-        if (flag == false)
-        {
-            sleep(1); // Sleep for a short while before sending next ICMP request
         }
     }
 

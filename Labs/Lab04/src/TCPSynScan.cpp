@@ -28,8 +28,8 @@ void *TCPSynScanUtil::Thread_TCPSynHost(void *param)
     INT ret;
     int len;
     std::string logMessage;
-    char *sendBuffer;              // The buffer for sending the SYN package
-    char *recvBuffer;              // The buffer for receiving the SYN/ACK package
+    char *sendBuffer = NULL;       // The buffer for sending the SYN package
+    char *recvBuffer = NULL;       // The buffer for receiving the SYN/ACK package
     struct pseudohdr *ptcph;       // The pseudo header for the TCP package
     struct tcphdr *tcph;           // The TCP header for the TCP package
     struct iphdr *recvIPHeader;    // The IP header for the received package
@@ -62,6 +62,16 @@ void *TCPSynScanUtil::Thread_TCPSynHost(void *param)
         // Clear the resources
         delete p;
         close(synSocket);
+        if (sendBuffer)
+        {
+            memset(sendBuffer, 0, MAX_BUFFERS_SIZE);
+            free(sendBuffer);
+        }
+        if (recvBuffer)
+        {
+            memset(recvBuffer, 0, MAX_BUFFERS_SIZE);
+            free(recvBuffer);
+        }
         // Decrease the thread number
         pthread_mutex_lock(&TCPSynThreadNumMutex);
         TCPSynThreadNum--;
@@ -77,8 +87,8 @@ void *TCPSynScanUtil::Thread_TCPSynHost(void *param)
     SYNScanHostAddress.sin_addr.s_addr = inet_addr(hostIP.c_str());
 
     // Malloc the send and receive buffer
-    sendBuffer = (char *)malloc(MAX_BUFFERS_SIZE);
-    memset(sendBuffer, 0, MAX_BUFFERS_SIZE);
+    sendBuffer = (char *)malloc(sizeof(struct pseudohdr) + sizeof(struct tcphdr));
+    memset(sendBuffer, 0, sizeof(struct pseudohdr) + sizeof(struct tcphdr));
     recvBuffer = (char *)malloc(MAX_BUFFERS_SIZE);
     memset(recvBuffer, 0, MAX_BUFFERS_SIZE);
 
@@ -124,7 +134,16 @@ void *TCPSynScanUtil::Thread_TCPSynHost(void *param)
 
         // Clear the resources
         delete p;
-        close(synSocket);
+        if (sendBuffer)
+        {
+            memset(sendBuffer, 0, sizeof(struct pseudohdr) + sizeof(struct tcphdr));
+            free(sendBuffer);
+        }
+        if (recvBuffer)
+        {
+            memset(recvBuffer, 0, MAX_BUFFERS_SIZE);
+            free(recvBuffer);
+        }
         // Decrease the thread number
         pthread_mutex_lock(&TCPSynThreadNumMutex);
         TCPSynThreadNum--;
@@ -147,6 +166,16 @@ void *TCPSynScanUtil::Thread_TCPSynHost(void *param)
         // Clear the resources
         delete p;
         close(synSocket);
+        if (sendBuffer)
+        {
+            memset(sendBuffer, 0, sizeof(struct pseudohdr) + sizeof(struct tcphdr));
+            free(sendBuffer);
+        }
+        if (recvBuffer)
+        {
+            memset(recvBuffer, 0, MAX_BUFFERS_SIZE);
+            free(recvBuffer);
+        }
         // Decrease the thread number
         pthread_mutex_lock(&TCPSynThreadNumMutex);
         TCPSynThreadNum--;
@@ -160,14 +189,13 @@ void *TCPSynScanUtil::Thread_TCPSynHost(void *param)
 
     while (true)
     {
-        // Take the SYN/ACK Package as a file descriptor, using ssize_t read (int fd, void *buf, size_t count)
+        // Take the received Package as a file descriptor, using ssize_t read (int fd, void *buf, size_t count)
         len = read(synSocket, recvBuffer, MAX_BUFFERS_SIZE);
-
         // Check the read results
         if (len > 0)
         {
-            // If the control flow reaches here, the SYN/ACK package is received
-            /* Parse the SYN/ACK Package */
+            // If the control flow reaches here, the package is received
+            /* Parse the received Package */
             // Get the IP Header and TCP Header
             recvIPHeader = (struct iphdr *)recvBuffer;
             recvTCPHeader = (struct tcphdr *)(recvBuffer + (recvIPHeader->ihl << 2));
@@ -178,6 +206,7 @@ void *TCPSynScanUtil::Thread_TCPSynHost(void *param)
             // Get the source and destination port
             sourcePort = ntohs(recvTCPHeader->source);
             destPort = ntohs(recvTCPHeader->dest);
+
             /**
              * Check if the requirements are met:
              * (1) Check if the source/dest IP and Port matches
@@ -195,9 +224,9 @@ void *TCPSynScanUtil::Thread_TCPSynHost(void *param)
                     logMessage = "[INFO] Host: " + hostIP + " Port: " + std::to_string(port) + " open!";
                     break;
                 }
-                else if ((recvTCPHeader->th_flags & (TH_RST | TH_ACK)) == (TH_RST | TH_ACK))
+                else if ((recvTCPHeader->th_flags & TH_RST) == TH_RST)
                 {
-                    // If the received package type is RST/ACK, the port is closed
+                    // If the received package type includes TH_RST, the port is closed
                     logMessage = "[INFO] Host: " + hostIP + " Port: " + std::to_string(port) + " closed!";
                     break;
                 }
@@ -223,6 +252,17 @@ void *TCPSynScanUtil::Thread_TCPSynHost(void *param)
     // Finish sending and reading socket SYN Package, free the resources
     delete p;
     close(synSocket);
+    // Clear the resources
+    if (sendBuffer)
+    {
+        memset(sendBuffer, 0, sizeof(struct pseudohdr) + sizeof(struct tcphdr));
+        free(sendBuffer);
+    }
+    if (recvBuffer)
+    {
+        memset(recvBuffer, 0, MAX_BUFFERS_SIZE);
+        free(recvBuffer);
+    }
 
     // Push the log message to the queue
     LogMessage log = {port, logMessage};
@@ -285,6 +325,7 @@ void *TCPSynScanUtil::Thread_TCPSynScan(void *param)
     if (ret != 0)
     {
         std::cerr << "[ERROR] Failed to create logger thread" << std::endl;
+        delete p;
         pthread_exit((void *)ERROR);
     }
 
@@ -292,15 +333,24 @@ void *TCPSynScanUtil::Thread_TCPSynScan(void *param)
     for (tempPort = beginPort; tempPort <= endPort; tempPort++)
     {
         // Get and store in the new parameter struct
-        TCPSynHostThreadParam *pSynHostParam = new TCPSynHostThreadParam;
+        TCPSynHostThreadParam *pSynHostParam = new TCPSynHostThreadParam();
         pSynHostParam->hostIP = hostIP;
         pSynHostParam->port = tempPort;
         pSynHostParam->localHostIP = localHostIP;
         pSynHostParam->localPort = localPort;
 
         // Set the thread attributes to detached
-        pthread_attr_init(&attr);
+        ret = pthread_attr_init(&attr);
         pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
+        // Check for attribute initialization error
+        if (ret != 0)
+        {
+            std::cerr << "[ERROR] Failed to initialize thread attributes" << std::endl;
+            delete pSynHostParam;
+            scanFailureFlag = true;
+            break;
+        }
 
         // Create the child thread
         ret = pthread_create(&childThreadID, &attr, Thread_TCPSynHost, (void *)pSynHostParam);
@@ -309,8 +359,12 @@ void *TCPSynScanUtil::Thread_TCPSynScan(void *param)
         {
             std::cerr << "[ERROR] Failed to create the thread for the TCP Syn Scanning on ip address " << hostIP << " and port " << tempPort << std::endl;
             scanFailureFlag = true;
+            delete pSynHostParam;
             break;
         }
+
+        // Destroy the thread attributes
+        pthread_attr_destroy(&attr);
 
         // Increment the thread number
         pthread_mutex_lock(&TCPSynThreadNumMutex);

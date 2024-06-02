@@ -22,12 +22,13 @@ typedef int INT;
 #define MIN_PORT 0
 #define DEFAULT_LOCAL_HOST_IP "127.0.0.1"       // The local host IP address
 #define DEFAULT_LOCAL_INET_IP "192.168.126.128" // The IPv4 address of the local host
-#define DEFAULT_LOCAL_PORT 3015
+#define DEFAULT_LOCAL_PORT 80                   // The local host port
 #define DEFAULT_HOST_IP "127.0.0.1"
 #define DEFAULT_HOST_TEST_IP "110.242.68.66" // 110.242.68.66 is the IPv4 address for www.baidu.com, which is used for testing
 #define MAX_BUFFERS_SIZE 8192
 #define MAX_PING_TIMEOUT 5
-#define MAX_SYN_TIMEOUT 3
+#define MAX_SYN_TIMEOUT 5
+#define MAX_FIN_TIMEOUT 5
 #define DEFAULT_PING_TIMES 3
 
 // Arguments
@@ -164,6 +165,54 @@ struct TCPSynThreadParam
 {
     /**
      * The struct for the parameters of the TCP Syn Scanning for the range of ports
+     */
+    std::string hostIP;      // The IP address of the host
+    std::string localHostIP; // The IP address of the local host
+    int beginPort;           // The begin port for scanning
+    int endPort;             // The end port for scanning
+    int localPort;           // The port of the local host
+};
+
+// TCP Fin Scan struct
+struct TCPFinHostThreadParam
+{
+    /**
+     * The struct for the parameters of the TCP Fin Scanning for the specific port
+     */
+    std::string hostIP;      // The IP address of the host
+    int port;                // The port for scanning
+    std::string localHostIP; // The IP address of the local host
+    int localPort;           // The port of the local host
+};
+
+struct TCPFinThreadParam
+{
+    /**
+     * The struct for the parameters of the TCP Fin Scanning for the range of ports
+     */
+    std::string hostIP;      // The IP address of the host
+    std::string localHostIP; // The IP address of the local host
+    int beginPort;           // The begin port for scanning
+    int endPort;             // The end port for scanning
+    int localPort;           // The port of the local host
+};
+
+// TCP UDP Scan struct
+struct UDPScanHostThreadParam
+{
+    /**
+     * The struct for the parameters of the UDP Scanning for the specific port
+     */
+    std::string hostIP;      // The IP address of the host
+    int port;                // The port for scanning
+    std::string localHostIP; // The IP address of the local host
+    int localPort;           // The port of the local host
+};
+
+struct UDPScanThreadParam
+{
+    /**
+     * The struct for the parameters of the UDP Scanning for the range of ports
      */
     std::string hostIP;      // The IP address of the host
     std::string localHostIP; // The IP address of the local host

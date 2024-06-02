@@ -16,6 +16,22 @@
 
 class TCPFinScanUtil
 {
+private:
+    /**
+     *  Declaration of the variables
+     */
+    /* TCP Fin Scanning Thread Parameters Struct */
+    static int TCPFinThreadNum;
+    static pthread_mutex_t TCPFinThreadNumMutex; // The mutex for the thread number
+    static int errorStatus;                      // The global error status for the single thread
+    static pthread_mutex_t errorStatusMutex;     // The mutex for the error status
+    static ThreadSafeQueue<LogMessage> logQueue;
+
+public:
+    TCPFinScanUtil(){};
+    ~TCPFinScanUtil(){};
+    static void *Thread_TCPFinHost(void *param); // Scanning on the specific port in this thread
+    static void *Thread_TCPFinScan(void *param); // Initialize the threads for scanning, calling upon the Thread_TCPFinHost function
 };
 
 #endif // TCP_FIN_SCAN_HPP
