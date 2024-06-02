@@ -8,12 +8,14 @@ LDFLAGS = -lgtest -lpthread -lrt
 TARGET = bin/Scaner
 # 源文件目录
 SRCDIR = src
+# 目标文件目录
+OBJDIR = obj
 # 源文件
 SRCS = $(SRCDIR)/Scaner.cpp $(SRCDIR)/ping.cpp $(SRCDIR)/TCPConnectScan.cpp \
-       $(SRCDIR)/TCPFinScan.cpp $(SRCDIR)/TCPSynScan.cpp $(SRCDIR)/UDPScan.cpp \
-       $(SRCDIR)/utils.cpp
+	   $(SRCDIR)/TCPFinScan.cpp $(SRCDIR)/TCPSynScan.cpp $(SRCDIR)/UDPScan.cpp \
+	   $(SRCDIR)/utils.cpp
 # 目标文件
-OBJS = $(SRCS:.cpp=.o)
+OBJS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SRCS))
 
 # 默认目标
 all: $(TARGET)
@@ -23,7 +25,7 @@ $(TARGET): $(OBJS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 # 编译源文件为目标文件
-%.o: %.cpp
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 # 清理生成的文件
