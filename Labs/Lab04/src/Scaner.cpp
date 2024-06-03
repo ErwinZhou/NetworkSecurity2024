@@ -341,7 +341,72 @@ inline INT UDPScan(std::string ip, int beginPort, int endPort, INT mode)
      *             MANUAL(0) for manually input
      *             AUTO(1) for automatically input
      */
+    // Declare the variables
+    INT ret;
+    pthread_attr_t attr;
+    pthread_t childThreadID;
+    struct UDPScanThreadParam param;
+    int status;
 
+    std::cout << "----------------------------- UDP Scan ------------------------------" << std::endl;
+    if (mode == MANUAL)
+    {
+        // If the mode is manual, input the begin port and end port
+        std::cout << "[INFO] Please input the range of port(0-65535)..." << std::endl;
+        std::cout << "Begin port: ";
+        std::cin >> beginPort;
+        std::cout << "End port: ";
+        std::cin >> endPort;
+    }
+    /* mode == AUTO */
+    // If the mode if AUTO, it means that the port range has already been given by the CML arguments
+    // Ping the target IP address first to make sure it is alive
+    ret = ping(ip, DEFAULT_PING_TIMES);
+    // If the ping is failed, return the error directly and stop the scanning
+    if (ret == FAILURE || ret == ERROR || ret == TIMEOUT)
+        return ret;
+
+    // Begin the UDP Scan
+    std::cout << "[INFO] UDP Scan Host " << ip << " port " << beginPort << "~" << endPort << "..." << std::endl;
+
+    // Initial the parameters for Thread_UDPScan
+    param.hostIP = ip;
+    param.beginPort = beginPort;
+    param.endPort = endPort;
+    param.localHostIP = DEFAULT_LOCAL_INET_IP;
+    param.localPort = DEFAULT_LOCAL_PORT;
+
+    // Initialize the threads for scanning, calling upon the Thread_UDPScan function
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+
+    // Create the child thread
+    ret = pthread_create(&childThreadID, &attr, UDPScanUtil::Thread_UDPScan, (void *)&param);
+
+    // Check if the thread is created successfully
+    if (ret != 0)
+    {
+        // Error
+        std::cerr << "[ERROR] Failed to create the thread for the UDP Scanning on ip address " << ip << " and port " << beginPort << "~" << endPort << std::endl;
+        return FAILURE;
+    }
+
+    // Wait for the child thread to finish
+    pthread_join(childThreadID, (void **)&status);
+
+    // Check the status of the thread
+    if (status == SUCCESS)
+    {
+        std::cout << "[INFO] UDP Scan Host " << ip << " port " << beginPort << "~" << endPort << " successfully" << std::endl;
+        std::cout << "---------------------------------------------------------------------------" << std::endl;
+        return SUCCESS;
+    }
+    else
+    {
+        std::cerr << "[ERROR] UDP Scan Host " << ip << " port " << beginPort << "~" << endPort << " FAILED" << std::endl;
+        std::cout << "---------------------------------------------------------------------------" << std::endl;
+        return FAILURE;
+    }
     return SUCCESS;
 }
 

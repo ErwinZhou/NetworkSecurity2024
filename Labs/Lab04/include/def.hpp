@@ -29,6 +29,7 @@ typedef int INT;
 #define MAX_PING_TIMEOUT 5
 #define MAX_SYN_TIMEOUT 5
 #define MAX_FIN_TIMEOUT 5
+#define MAX_UDP_TIMEOUT 7
 #define DEFAULT_PING_TIMES 3
 
 // Arguments
@@ -103,18 +104,29 @@ public:
 };
 
 /* Struct Definitions */
-// Pseudo TCP Header
+// Pseudo TCP/UDP Header
 struct pseudohdr
 {
     /**
-     * This struct is used for the pseudo header of the TCP package
-     * To calculate the checksum of the TCP package
+     * This struct is used for the pseudo header of the TCP and UDP package
+     * To calculate the checksum of the TCP and UDP package
      */
     uint32_t saddr;   // Source IP address
     uint32_t daddr;   // Destination IP address
     uint8_t useless;  // To fill the 8 bits of 0
     uint8_t protocol; // Protocol type
     uint16_t length;  // The length of the TCP package
+};
+
+// IP-ICMP Header
+struct ipicmphdr
+{
+    /**
+     * This struct is used for the IP and ICMP header
+     * To use in receving the UDP scan response
+     */
+    struct iphdr ipHeader;     // The IP header
+    struct icmphdr icmpHeader; // The ICMP header
 };
 
 // Mutil-Thread Communication Struct - LogMessage
@@ -220,4 +232,5 @@ struct UDPScanThreadParam
     int endPort;             // The end port for scanning
     int localPort;           // The port of the local host
 };
+
 #endif // DEF_HPP

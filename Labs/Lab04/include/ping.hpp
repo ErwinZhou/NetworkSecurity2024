@@ -40,7 +40,7 @@ private:
     struct timeval *tp;              // the timeval struct as timepstamp
     struct timeval waitingStartTP;   // the timeval struct as the start time for waiting
     struct timeval waitingEndTP;     // the timeval struct as the end time for waiting
-    int ret;                         // return results to determine the success of the operation
+    INT ret;                         // return results to determine the success of the operation
     struct sockaddr_in pingHostAddr; // the destination address to send ICMP packet
     struct sockaddr_in fromHostAddr; // the source address of the received packet
     int addrLen;                     // the length of the address

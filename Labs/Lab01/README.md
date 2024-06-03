@@ -1,4 +1,4 @@
-# TechnologiesOfNetworkSecurity
+# NetworkSecurity2024
 ## Lab01-TCP Chat Room using DES Encryption
 This project is to implement a simple chat room based on TCP protocol, and use **DES encryption** algorithm to encrypt the communication content. I creatively designed it based on **Special Service and Agent Theme**, which I though would be much fun.
 * Platform: Linux

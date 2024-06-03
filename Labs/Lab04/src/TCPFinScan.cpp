@@ -23,8 +23,8 @@ void *TCPFinScanUtil::Thread_TCPFinHost(void *param)
     int port;
     std::string localHostIP;
     int localPort;
-    sockaddr_in FINScanHostAddress; // The host address
-    int finSocket;                  // The socket for the FIN scanning
+    struct sockaddr_in FINScanHostAddress; // The host address
+    int finSocket;                         // The socket for the FIN scanning
     INT ret;
     int len;
     std::string logMessage;
@@ -197,8 +197,8 @@ void *TCPFinScanUtil::Thread_TCPFinHost(void *param)
             // Check if the source/dest IP and Port matches
             if (sourceHostIP == hostIP && destHostIP == localHostIP && sourcePort == port && destPort == localPort)
             {
-                // Debug
-                std::cout << "[INFO] th_flags: 0x" << std::hex << static_cast<int>(recvTCPHeader->th_flags) << std::dec << std::endl;
+                // // Debug
+                // std::cout << "[INFO] th_flags: 0x" << std::hex << static_cast<int>(recvTCPHeader->th_flags) << std::dec << std::endl;
                 if ((recvTCPHeader->th_flags & TH_RST) == TH_RST)
                 {
                     // If the received package type includes TH_RST, the port is closed
@@ -293,7 +293,7 @@ void *TCPFinScanUtil::Thread_TCPFinScan(void *param)
 
     if (ret != 0)
     {
-        std::cerr << "[ERROR] Failed to create logger thread" << std::endl;
+        std::cerr << "[ERROR] Failed to create logger thread for the TCP Fin Scanning on ip address " << hostIP << std::endl;
         delete p;
         pthread_exit((void *)ERROR);
     }

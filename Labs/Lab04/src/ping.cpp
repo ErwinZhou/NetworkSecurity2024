@@ -37,6 +37,19 @@ INT ICMPUtil::ping(int times)
     on = 1;
     ret = setsockopt(pingSocket, 0, IP_HDRINCL, &on, sizeof(on));
 
+    // Check the return value
+    if (ret == -1)
+    {
+        std::cout << "Failed to set the socket option for ping on ip address " << hostIP << std::endl;
+        // Clear the resources
+        memset(sendBuffer, 0, sendBufferSize);
+        free(sendBuffer);
+        memset(recvBuffer, 0, MAX_BUFFERS_SIZE);
+        free(recvBuffer);
+        close(pingSocket);
+
+        return ERROR;
+    }
     /**
      * Create the ICMP Echo Package
      * The ICMP Echo Package should include four parts to meet the standard ping package on Linux Platform:
@@ -90,12 +103,31 @@ INT ICMPUtil::ping(int times)
 
     // // Send the ICMP Request
     if (sendto(pingSocket, sendBuffer, sendBufferSize, 0, (struct sockaddr *)&pingHostAddr, addrLen) == -1)
+    {
+        std::cout << "[ERROR] Failed to send the ICMP Request to " << hostIP << std::endl;
+        // Clear the resources
+        memset(sendBuffer, 0, sendBufferSize);
+        free(sendBuffer);
+        memset(recvBuffer, 0, MAX_BUFFERS_SIZE);
+        free(recvBuffer);
+        close(pingSocket);
         return ERROR;
+    }
 
     /* Waiting for ICMP Reply */
     // Set the socket to non-block mode
     if (fcntl(pingSocket, F_SETFL, O_NONBLOCK) < 0)
+    {
+        std::cout << "[ERROR] Failed to set the socket to non-blocking mode for ping on ip address " << hostIP << std::endl;
+        // Clear the resources
+        memset(sendBuffer, 0, sendBufferSize);
+        free(sendBuffer);
+        memset(recvBuffer, 0, MAX_BUFFERS_SIZE);
+        free(recvBuffer);
+        close(pingSocket);
         return ERROR;
+    }
+
     // Busy waiting for the ICMP Reply
     gettimeofday(&waitingStartTP, NULL);
     while (pingtimes < times || times == 0)
@@ -115,7 +147,16 @@ INT ICMPUtil::ping(int times)
 
             // Send the ICMP Request
             if (sendto(pingSocket, sendBuffer, sendBufferSize, 0, (struct sockaddr *)&pingHostAddr, addrLen) == -1)
+            {
+                std::cout << "[ERROR] Failed to send the ICMP Request to " << hostIP << std::endl;
+                // Clear the resources
+                memset(sendBuffer, 0, sendBufferSize);
+                free(sendBuffer);
+                memset(recvBuffer, 0, MAX_BUFFERS_SIZE);
+                free(recvBuffer);
+                close(pingSocket);
                 return ERROR;
+            }
 
             gettimeofday(&waitingStartTP, NULL);
             // Set the flag to false for avoiding sending another ICMP Package immediately without receving the last one
