@@ -101,7 +101,7 @@ INT ICMPUtil::ping(int times)
     pingHostAddr.sin_addr.s_addr = inet_addr(hostIP.c_str()); // Convert the IP address to the network byte order
     addrLen = sizeof(pingHostAddr);
 
-    // // Send the ICMP Request
+    // Send the ICMP Request
     if (sendto(pingSocket, sendBuffer, sendBufferSize, 0, (struct sockaddr *)&pingHostAddr, addrLen) == -1)
     {
         std::cout << "[ERROR] Failed to send the ICMP Request to " << hostIP << std::endl;

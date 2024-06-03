@@ -5,13 +5,13 @@ CXXFLAGS = -g -Wall -std=c++11 -I include
 # 链接标志
 LDFLAGS = -lgtest -lpthread -lrt
 # 目标可执行文件
-TARGET = bin/Scaner
+TARGET = bin/Scanner
 # 源文件目录
 SRCDIR = src
 # 目标文件目录
 OBJDIR = obj
 # 源文件
-SRCS = $(SRCDIR)/Scaner.cpp $(SRCDIR)/ping.cpp $(SRCDIR)/TCPConnectScan.cpp \
+SRCS = $(SRCDIR)/Scanner.cpp $(SRCDIR)/ping.cpp $(SRCDIR)/TCPConnectScan.cpp \
 	   $(SRCDIR)/TCPFinScan.cpp $(SRCDIR)/TCPSynScan.cpp $(SRCDIR)/UDPScan.cpp \
 	   $(SRCDIR)/utils.cpp
 # 目标文件

@@ -27,9 +27,9 @@ typedef int INT;
 #define DEFAULT_HOST_TEST_IP "110.242.68.66" // 110.242.68.66 is the IPv4 address for www.baidu.com, which is used for testing
 #define MAX_BUFFERS_SIZE 8192
 #define MAX_PING_TIMEOUT 5
-#define MAX_SYN_TIMEOUT 5
-#define MAX_FIN_TIMEOUT 5
-#define MAX_UDP_TIMEOUT 7
+#define MAX_SYN_TIMEOUT 3
+#define MAX_FIN_TIMEOUT 3
+#define MAX_UDP_TIMEOUT 5
 #define DEFAULT_PING_TIMES 3
 
 // Arguments

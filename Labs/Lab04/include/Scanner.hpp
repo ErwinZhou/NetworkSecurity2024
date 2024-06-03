@@ -1,4 +1,4 @@
-// Declarations of the functions used in Scaner.cpp
+// Declarations of the functions used in Scanner.cpp
 
 #include "TCPConnectScan.hpp"
 #include "TCPFinScan.hpp"

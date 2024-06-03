@@ -1,6 +1,6 @@
-// The main function of the program: Parse the arguments and Execute the scaner
+// The main function of the program: Parse the arguments and Execute the scanner
 
-#include "Scaner.hpp"
+#include "Scanner.hpp"
 
 INT ping(std::string ip, int times)
 {
@@ -59,7 +59,7 @@ inline void help(const char *program)
      * @return void
      */
     // Help Info
-    std::cerr << "------------------------------ Scaner Help Info ------------------------------" << std::endl;
+    std::cerr << "------------------------------ Scanner Help Info ------------------------------" << std::endl;
 
     std::string programPath(program);
     size_t pos = programPath.find_last_of("/\\");

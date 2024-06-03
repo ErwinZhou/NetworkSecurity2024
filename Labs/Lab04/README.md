@@ -1,4 +1,4 @@
-# Port Scanner
+# Lab04 Port Scanner
 ![badge](https://img.shields.io/badge/Author-ErwinZhou-blue)  
 [![license](https://img.shields.io/github/license/ErwinZhou/NetworkSecurity2024.svg)](https://github.com/ErwinZhou/NetworkSecurity2024/blob/main/LICENSE)  
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
