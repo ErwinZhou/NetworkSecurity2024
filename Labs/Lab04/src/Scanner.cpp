@@ -117,6 +117,13 @@ inline INT TCPConnectScan(std::string ip, int beginPort, int endPort, INT mode)
         std::cin >> beginPort;
         std::cout << "End port: ";
         std::cin >> endPort;
+
+        // Check the port range to see if it is valid
+        if (!isValidPort(beginPort, endPort))
+        {
+            std::cerr << "[ERROR] The begin port and end port are INVALID" << std::endl;
+            return FAILURE;
+        }
     }
     /* mode == AUTO */
     // If the mode if AUTO, it means that the port range has already been given by the CML arguments
@@ -196,6 +203,13 @@ inline INT TCPSyncan(std::string ip, int beginPort, int endPort, INT mode)
         std::cin >> beginPort;
         std::cout << "End port: ";
         std::cin >> endPort;
+
+        // Check the port range to see if it is valid
+        if (!isValidPort(beginPort, endPort))
+        {
+            std::cerr << "[ERROR] The begin port and end port are INVALID" << std::endl;
+            return FAILURE;
+        }
     }
     /* mode == AUTO */
     // If the mode if AUTO, it means that the port range has already been given by the CML arguments
@@ -277,6 +291,13 @@ inline INT TCPFinScan(std::string ip, int beginPort, int endPort, INT mode)
         std::cin >> beginPort;
         std::cout << "End port: ";
         std::cin >> endPort;
+
+        // Check the port range to see if it is valid
+        if (!isValidPort(beginPort, endPort))
+        {
+            std::cerr << "[ERROR] The begin port and end port are INVALID" << std::endl;
+            return FAILURE;
+        }
     }
     /* mode == AUTO */
     // If the mode if AUTO, it means that the port range has already been given by the CML arguments
@@ -357,6 +378,13 @@ inline INT UDPScan(std::string ip, int beginPort, int endPort, INT mode)
         std::cin >> beginPort;
         std::cout << "End port: ";
         std::cin >> endPort;
+
+        // Check the port range to see if it is valid
+        if (!isValidPort(beginPort, endPort))
+        {
+            std::cerr << "[ERROR] The begin port and end port are INVALID" << std::endl;
+            return FAILURE;
+        }
     }
     /* mode == AUTO */
     // If the mode if AUTO, it means that the port range has already been given by the CML arguments

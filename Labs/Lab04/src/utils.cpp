@@ -97,7 +97,7 @@ bool isValidPort(int beginPort, int endPort)
      * @param endPort The end port
      * @return True if the begin and end ports are valid for out of range, otherwise false
      */
-    if (beginPort < MIN_PORT || beginPort > MAX_PORT || endPort < MIN_PORT || endPort > MAX_PORT || beginPort > endPort)
+    if (beginPort <= MIN_PORT || beginPort >= MAX_PORT || endPort <= MIN_PORT || endPort >= MAX_PORT || beginPort >= endPort)
         return false;
     return true;
 }
