@@ -40,7 +40,7 @@ INT ICMPUtil::ping(int times)
     // Check the return value
     if (ret == -1)
     {
-        std::cout << "Failed to set the socket option for ping on ip address " << hostIP << std::endl;
+        std::cout << "[ERROR] Failed to set the socket option for ping on ip address " << hostIP << std::endl;
         // Clear the resources
         memset(sendBuffer, 0, sendBufferSize);
         free(sendBuffer);

@@ -8,6 +8,7 @@ pthread_mutex_t TCPSynScanUtil::TCPSynThreadNumMutex;
 int TCPSynScanUtil::errorStatus;
 pthread_mutex_t TCPSynScanUtil::errorStatusMutex;
 ThreadSafeQueue<LogMessage> TCPSynScanUtil::logQueue;
+pthread_mutex_t TCPSynScanUtil::logQueueMutex;
 
 // The function for scanning on the specific port in this thread
 void *TCPSynScanUtil::Thread_TCPSynHost(void *param)
@@ -266,7 +267,9 @@ void *TCPSynScanUtil::Thread_TCPSynHost(void *param)
 
     // Push the log message to the queue
     LogMessage log = {port, logMessage};
+    pthread_mutex_lock(&logQueueMutex);
     logQueue.push(log);
+    pthread_mutex_unlock(&logQueueMutex);
 
     // Decrease the thread number
     pthread_mutex_lock(&TCPSynThreadNumMutex);

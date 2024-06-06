@@ -25,7 +25,8 @@ private:
     static pthread_mutex_t TCPFinThreadNumMutex; // The mutex for the thread number
     static int errorStatus;                      // The global error status for the single thread
     static pthread_mutex_t errorStatusMutex;     // The mutex for the error status
-    static ThreadSafeQueue<LogMessage> logQueue;
+    static ThreadSafeQueue<LogMessage> logQueue; // The log queue
+    static pthread_mutex_t logQueueMutex;        // The mutex for the log queue
 
 public:
     TCPFinScanUtil(){};

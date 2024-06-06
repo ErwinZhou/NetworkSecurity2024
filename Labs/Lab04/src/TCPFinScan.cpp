@@ -8,6 +8,7 @@ pthread_mutex_t TCPFinScanUtil::TCPFinThreadNumMutex;
 int TCPFinScanUtil::errorStatus;
 pthread_mutex_t TCPFinScanUtil::errorStatusMutex;
 ThreadSafeQueue<LogMessage> TCPFinScanUtil::logQueue;
+pthread_mutex_t TCPFinScanUtil::logQueueMutex;
 
 // Scanning on the specific port in this thread
 void *TCPFinScanUtil::Thread_TCPFinHost(void *param)
@@ -234,7 +235,9 @@ void *TCPFinScanUtil::Thread_TCPFinHost(void *param)
 
     // Push the log message to the queue
     LogMessage log = {port, logMessage};
+    pthread_mutex_lock(&logQueueMutex);
     logQueue.push(log);
+    pthread_mutex_unlock(&logQueueMutex);
 
     // Decrease the thread number
     pthread_mutex_lock(&TCPFinThreadNumMutex);

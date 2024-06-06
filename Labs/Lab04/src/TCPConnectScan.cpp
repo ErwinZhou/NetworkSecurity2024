@@ -8,6 +8,7 @@ pthread_mutex_t TCPConnectScanUtil::TCPConnectThreadNumMutex;
 int TCPConnectScanUtil::errorStatus;
 pthread_mutex_t TCPConnectScanUtil::errorStatusMutex;
 ThreadSafeQueue<LogMessage> TCPConnectScanUtil::logQueue;
+pthread_mutex_t TCPConnectScanUtil::logQueueMutex;
 /* Mutil Thread Scanning functions for the TCP Connect Scanning */
 
 // Scan on the specific port in this thread
@@ -92,7 +93,9 @@ void *TCPConnectScanUtil::Thread_TCPConnectHost(void *param)
 
     // Push the log message to the queue
     LogMessage log = {port, logMessage};
+    pthread_mutex_lock(&logQueueMutex);
     logQueue.push(log);
+    pthread_mutex_unlock(&logQueueMutex);
 
     // Decrease the number of threads
     pthread_mutex_lock(&TCPConnectThreadNumMutex);
@@ -101,8 +104,6 @@ void *TCPConnectScanUtil::Thread_TCPConnectHost(void *param)
 
     // Exit the thread
     pthread_exit(NULL);
-
-    std::cout << "Thread_TCPConnectHost Bye Bye" << std::endl;
 }
 
 // Initialize the threads for scanning, calling upon the Thread_TCPConnectHost function
